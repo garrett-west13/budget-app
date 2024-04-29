@@ -1,0 +1,51 @@
+{% extends 'layout.html' %}
+
+{% load static %}
+
+{% block title %}Budgeting App{% endblock %}
+
+{% block content %}
+<div class="container">
+    {% if not user.is_authenticated %}
+    <div class="jumbotron mt-5">
+        <h1 class="display-4">Welcome to Your Budgeting App</h1>
+        <p class="lead">Take control of your finances and achieve your financial goals.</p>
+        <hr class="my-4">
+        <p>Get started by logging in or creating an account.</p>
+        <a class="btn btn-primary btn-lg" href="{% url 'login' %}" role="button">Login</a>
+        <a class="btn btn-success btn-lg" href="{% url 'register' %}" role="button">Register</a>
+    </div>
+    {% else %}
+    <div id="calendar-container" class="calendar-container">
+        <div class="d-flex justify-content-between mb-2">
+            <button type="button" class="btn btn-primary ml-2 mb-2" id="prev-month">Previous Month</button>
+            <button type="button" class="btn btn-primary ml-2 mb-2" id="current-month">Current Month</button>
+            <button type="button" class="btn btn-primary ml-2 mb-2" id="next-month">Next Month</button>
+        </div>
+        <p class="text-muted text-center">
+            to add a new transaction, click on any day you want to add it to.
+        </p>
+        <div id="calendar">
+        </div>
+    </div>
+    <div class="monthly-overview-container">
+        <div class="expenses">
+            <h2>Total Expenses</h2>
+            <p>${{ total_expenses }}</p>
+        </div>
+        <div class="income">
+            <h2>Total Income</h2>
+            <p>${{ total_income }}</p>
+        </div>
+        <div class="balance">
+            <h2>Total Balance</h2>
+            <p>${{ total_balance }} {% if total_balance > 0 %}(Surplus){% else %}(Deficit){% endif %}</p>
+        </div>
+        <div class="savings">
+            <h2>Total Savings</h2>
+            <p>${{ total_savings }}</p>
+        </div>        
+    </div>    
+    {% endif %} 
+    <script src="{% static 'script.js' %}"></script> 
+{% endblock %}

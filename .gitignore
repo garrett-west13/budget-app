@@ -1,0 +1,20 @@
+# Ignore Python compiled bytecode
+__pycache__/
+*.py[cod]
+
+# Ignore virtual environment
+venv/
+myenv/
+
+# Ignore IDE-specific files
+.idea/
+.vscode/
+
+# Ignore build artifacts
+build/
+dist/
+
+
+# Ignore development dependencies
+requirements-dev.txt
+requirements-dev.lock
