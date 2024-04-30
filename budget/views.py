@@ -97,28 +97,29 @@ def add_transaction(request, year, month, day):
             transaction.transaction_date = datetime(year, month, day)
             transaction.save()
 
-            if transaction.recurring:  # Use 'transaction' after it has been assigned a value
-                current_date = transaction.transaction_date + relativedelta(months=1)
-                while current_date.year <= datetime.now().year and current_date.month <= datetime.now().month:
+            # Check if the transaction is recurring and handle it
+            if transaction.recurring:
+                current_date = transaction.transaction_date
+                while current_date < timezone.now():  
+                    current_date += relativedelta(months=1)
                     new_transaction = Transaction(
                         user=request.user,
                         amount=transaction.amount,
                         category=transaction.category,
                         description=transaction.description,
-                        recurring=False,  # Make sure the new transaction is not recurring
+                        recurring=False, 
                         is_income=transaction.is_income,
                         transaction_date=current_date
                     )
                     new_transaction.save()
 
-                    current_date += relativedelta(months=1)
-
+            # Redirect after saving
             return redirect('add_transaction', year=year, month=month, day=day)
     else:
         form = TransactionForm(initial={'transaction_date': datetime(year, month, day)})
 
     # Fetch all transactions for the current user and transaction date
-    transactions = Transaction.objects.filter(user_id=request.user.id, transaction_date=datetime(year, month, day))
+    transactions = Transaction.objects.filter(user=request.user, transaction_date=datetime(year, month, day))
 
     # Separate income and expense transactions
     income_transactions = transactions.filter(is_income=True)
@@ -128,6 +129,7 @@ def add_transaction(request, year, month, day):
     total_income = income_transactions.aggregate(total=Sum('amount'))['total'] or 0
     total_expense = expense_transactions.aggregate(total=Sum('amount'))['total'] or 0
     remainder = total_income - total_expense
+    total_savings = 0
 
     context = {
         'transaction_date': datetime(year, month, day),
@@ -135,8 +137,9 @@ def add_transaction(request, year, month, day):
         'income_transactions': income_transactions,
         'expense_transactions': expense_transactions,
         'total_income': total_income,
-        'total_expense': total_expense,
-        'remainder': remainder
+        'total_expenses': total_expense,
+        'total_balance': remainder,
+        'total_savings': total_savings,
     }
 
     return render(request, 'transactions.html', context)

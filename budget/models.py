@@ -1,21 +1,11 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser, Group, Permission
-
-
-class User(AbstractUser):
-    groups = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='budget_user_groups')
-    user_permissions = models.ForeignKey(Permission, on_delete=models.CASCADE, related_name='budget_user_permissions')
-
-    def __str__(self):
-        return self.username
+from django.contrib.auth.models import User
+from django.utils.text import slugify
     
 
 class Category(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.name
+    name = models.CharField(max_length=255)
 
 
 class Transaction(models.Model):

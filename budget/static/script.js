@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+
 function loadCalendarContent(year, month) {
     fetch(`/calendar/${year}/${month + 1}/`)
         .then(response => {

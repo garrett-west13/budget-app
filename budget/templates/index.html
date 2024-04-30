@@ -39,7 +39,7 @@
         </div>
         <div class="balance">
             <h2>Total Balance</h2>
-            <p>${{ total_balance }} {% if total_balance > 0 %}(Surplus){% else %}(Deficit){% endif %}</p>
+            <p>{% if total_balance > 0 %}<span class="surplus">$+{{ total_balance }}</span>{% else %}<span class="deficit">$-{{ total_balance }}</span>{% endif %}</p>
         </div>
         <div class="savings">
             <h2>Total Savings</h2>

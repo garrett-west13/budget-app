@@ -2,6 +2,7 @@ from calendar import HTMLCalendar, monthrange
 from datetime import datetime
 from django.utils.safestring import SafeString
 from django.urls import reverse
+from .models import Transaction
 
 class Calendar(HTMLCalendar):
 
@@ -41,6 +42,17 @@ class Calendar(HTMLCalendar):
         # Get the current date
         current_date = datetime.now().date()
 
+        transactions = Transaction.objects.filter(transaction_date__year=year, transaction_date__month=month_int)
+
+        # Create a dictionary to store the days with transactions
+        days_with_transactions = {day: False for day in range(1, days_in_month + 1)}
+
+        # Update the dictionary with the days that have transactions
+        for transaction in transactions:
+            transaction_day = transaction.transaction_date.day
+            days_with_transactions[transaction_day] = True
+
+
         # Calculate the number of weeks in the month
         num_weeks = (days_in_month + first_weekday) // 7
         if (days_in_month + first_weekday) % 7 > 0:
@@ -59,7 +71,8 @@ class Calendar(HTMLCalendar):
                     date = datetime(year, month_int, current_day)
                     url = reverse('add_transaction', args=(date.year, date.month, date.day))
                     cell_class = 'current-day' if date.date() == current_date else 'day'
-                    html_code += f"    <td class='{self.cssclasses[day]} {cell_class}' id='day-{date.strftime('%Y-%m-%d')}'><a class='day-link' href='{url}'><div class='cell-content'>{current_day}</div></a></td>\n"
+                    has_transactions = 'transaction-day' if days_with_transactions[current_day] else ''
+                    html_code += f"    <td class='{self.cssclasses[day]} {cell_class} {has_transactions}' id='day-{date.strftime('%Y-%m-%d')}'><a class='day-link' href='{url}'><div class='cell-content'>{current_day}</div></a></td>\n"
             html_code += "  </tr>\n"
 
         html_code += "</table>\n"

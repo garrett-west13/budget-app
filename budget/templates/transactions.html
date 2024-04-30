@@ -47,7 +47,7 @@
 
 <div class="container" id="transactions">
     <h2>Transactions for {{ transaction_date|date:"F d, Y" }}</h2>
-    {% if transactions_exist %}
+    {% if income_transactions %}
         <!-- Income Transactions Table -->
         <div class="transaction-table">
             <h3>Income Transactions</h3>
@@ -65,7 +65,7 @@
                     {% for transaction in income_transactions %}
                         <tr>
                             <td>{{ transaction.category.name }}</td>
-                            <td>{{ transaction.amount }}</td>
+                            <td>${{ transaction.amount }}</td>
                             <td>{{ transaction.description }}</td>
                             <td>{{ transaction.transaction_date|date:"F d, Y" }}</td>
                             <td>{% if transaction.recurring %}Yes{% else %}No{% endif %}</td>
@@ -74,7 +74,7 @@
                 </tbody>
             </table>
         </div>
-
+    {% elif expense_transactions %}
         <!-- Expense Transactions Table -->
         <div class="transaction-table">
             <h3>Expense Transactions</h3>
@@ -92,7 +92,7 @@
                     {% for transaction in expense_transactions %}
                         <tr>
                             <td>{{ transaction.category.name }}</td>
-                            <td>{{ transaction.amount }}</td>
+                            <td>${{ transaction.amount }}</td>
                             <td>{{ transaction.description }}</td>
                             <td>{{ transaction.transaction_date|date:"F d, Y" }}</td>
                             <td>{% if transaction.recurring %}Yes{% else %}No{% endif %}</td>
@@ -103,18 +103,29 @@
         </div>
 
     {% else %}
-        <p>No transactions found for {{ transaction_date|date:"F d, Y" }}</p>
+        <p>No transactions found</p>
     {% endif %}
 
     <!-- Total Income and Expense -->
-    <div class="total-income-expense">
-        <p>Total Income: {{ total_income }}</p>
-        <p>Total Expense: {{ total_expense }}</p>
-        <p>Remainder: {{ remainder }}</p>
-    </div>
+    <div class="monthly-overview-container mb-5">
+        <div class="expenses">
+            <h2>Total Expenses</h2>
+            <p>${{ total_expenses }}</p>
+        </div>
+        <div class="income">
+            <h2>Total Income</h2>
+            <p>${{ total_income }}</p>
+        </div>
+        <div class="balance">
+            <h2>Total Balance</h2>
+            <p>{% if total_balance > 0 %}<span class="surplus">$+{{ total_balance }}</span>{% else %}<span class="deficit">${{ total_balance }}</span>{% endif %}</p>
+        </div>
+        <div class="savings">
+            <h2>Total Savings</h2>
+            <p>${{ total_savings }}</p>
+        </div>        
+    </div>  
 </div>
-
-
 
 {% endblock %}
 
