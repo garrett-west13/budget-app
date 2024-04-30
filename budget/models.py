@@ -7,6 +7,8 @@ class Category(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
 
+    def __str__(self):
+        return self.name
 
 class Transaction(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -14,9 +16,12 @@ class Transaction(models.Model):
     description = models.CharField(max_length=255)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now_add=True)
-    recurring = models.BooleanField(default=False)
     is_income = models.BooleanField(default=False)
     transaction_date = models.DateField()
+    recurring = models.BooleanField(default=False)
+    frequency = models.CharField(max_length=10, null=True, blank=True)  # e.g., 'monthly', 'weekly', 
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
 
     def __str__(self):
         return self.description

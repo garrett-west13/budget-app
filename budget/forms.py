@@ -21,7 +21,7 @@ class TransactionForm(forms.ModelForm):
         model = Transaction
         fields = ['amount', 'category', 'description', 'transaction_date', 'recurring', 'is_income']
         widgets = {
-            'recurring': forms.RadioSelect(choices=[(True, 'Yes'), (False, 'No')]),
+            'recurring': forms.CheckboxInput(),
             'is_income': forms.RadioSelect(choices=[(True, 'Income'), (False, 'Expense')]),
         }
 

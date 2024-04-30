@@ -24,11 +24,23 @@
         </div>
 
         <div class="form-group">
-            <label>Recurring:</label>
-            {% for radio in form.recurring %}
-                {{ radio }}
-            {% endfor %}
+            <label for="recurring">Recurring:</label>
+            {{ form.recurring }}    
         </div>
+        
+        {% if form.recurring.value %}
+        <div class="form-group" id="frequencyField">
+            <label for="frequency">Frequency:</label>
+            <select class="form-control" id="frequency" name="frequency">
+                <option value="monthly">Monthly</option>
+                <option value="weekly">Weekly</option>
+                <option value="biweekly">Biweekly</option>
+                <option value="yearly">Yearly</option>
+            </select>
+        </div>
+        {% endif %}
+        
+        
 
         <div class="form-group">
             <label>Income or Expense:</label>

@@ -8,13 +8,12 @@ from django.contrib.auth.forms import AuthenticationForm
 from .calendar import Calendar
 from datetime import datetime
 from .models import Transaction, Category, Goal
-from django.template.loader import render_to_string
 from django.http import JsonResponse
-from django.utils.html import mark_safe
 from django.http import HttpResponse
 from django.db.models import Sum
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
+from datetime import timedelta
 
 
 @login_required
@@ -95,12 +94,14 @@ def add_transaction(request, year, month, day):
             transaction = form.save(commit=False)
             transaction.user = request.user
             transaction.transaction_date = datetime(year, month, day)
+            transaction.frequency = form.cleaned_data['frequency']
             transaction.save()
 
             # Check if the transaction is recurring and handle it
             if transaction.recurring:
                 current_date = transaction.transaction_date
-                while current_date < timezone.now():  
+                end_date = transaction.end_date or current_date + timedelta(days=365)  # Default to one year from transaction date
+                while current_date <= end_date:
                     current_date += relativedelta(months=1)
                     new_transaction = Transaction(
                         user=request.user,
@@ -143,6 +144,8 @@ def add_transaction(request, year, month, day):
     }
 
     return render(request, 'transactions.html', context)
+
+
 
 def calendar(request, year, month):
     calendar = Calendar()
