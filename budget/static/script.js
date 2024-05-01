@@ -38,7 +38,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-
 function loadCalendarContent(year, month) {
     fetch(`/calendar/${year}/${month + 1}/`)
         .then(response => {
@@ -52,24 +51,3 @@ function loadCalendarContent(year, month) {
         });
 }
 
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Get the recurring checkbox element
-    const recurringCheckbox = document.getElementById('id_recurring');
-
-    // Get the frequency select field element
-    const frequencyField = document.getElementById('frequency');
-
-    // Hide the frequency field initially
-    frequencyField.style.display = 'none';
-
-    // Add an event listener to the recurring checkbox
-    recurringCheckbox.addEventListener('change', function() {
-        // If the recurring checkbox is checked, show the frequency field, otherwise hide it
-        if (this.checked) {
-            frequencyField.style.display = 'block';
-        } else {
-            frequencyField.style.display = 'none';
-        }
-    });
-});

@@ -17,6 +17,7 @@ class LoginForm(AuthenticationForm):
         fields = ['username', 'password']
 
 class TransactionForm(forms.ModelForm):
+    end_date = forms.DateField(required=False, label='End Date')
     class Meta:
         model = Transaction
         fields = ['amount', 'category', 'description', 'transaction_date', 'recurring', 'is_income']

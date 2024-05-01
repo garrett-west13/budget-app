@@ -24,21 +24,24 @@
         </div>
 
         <div class="form-group">
-            <label for="recurring">Recurring:</label>
+            <label for="{{ form.recurring.id_for_label }}">Recurring:</label>
             {{ form.recurring }}    
         </div>
         
-        {% if form.recurring.value %}
         <div class="form-group" id="frequencyField">
             <label for="frequency">Frequency:</label>
             <select class="form-control" id="frequency" name="frequency">
                 <option value="monthly">Monthly</option>
                 <option value="weekly">Weekly</option>
-                <option value="biweekly">Biweekly</option>
+                <option value="biweekly">Bi-weekly</option>
                 <option value="yearly">Yearly</option>
             </select>
         </div>
-        {% endif %}
+
+        <div class="form-group" id="endDateField">
+            <label for="end_date">End Date:</label>
+            <input type="date" class="form-control" id="end_date" name="end_date">
+        </div>
         
         
 
@@ -139,5 +142,31 @@
     </div>  
 </div>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    // Get the recurring checkbox element
+    const recurringCheckbox = document.getElementById('id_recurring');
+
+    // Get the frequency select field element
+    const frequencyField = document.getElementById('frequencyField');
+    const endDateField = document.getElementById('endDateField');
+
+    // Hide the frequency field initially
+    frequencyField.style.display = 'none';
+    endDateField.style.display = 'none';
+
+    // Add an event listener to the recurring checkbox
+    recurringCheckbox.addEventListener('change', function() {
+        // If the recurring checkbox is checked, show the frequency field, otherwise hide it
+        if (this.checked) {
+            frequencyField.style.display = 'block';
+            endDateField.style.display = 'block';
+        } else {
+            frequencyField.style.display = 'none';
+            endDateField.style.display = 'none';
+        }
+    });
+});
+</script>
 {% endblock %}
 

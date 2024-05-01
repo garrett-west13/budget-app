@@ -16,6 +16,19 @@ from dateutil.relativedelta import relativedelta
 from datetime import timedelta
 
 
+def get_relativedelta(frequency):
+    if frequency == 'monthly':
+        return relativedelta(months=1)
+    elif frequency == 'weekly':
+        return relativedelta(weeks=1)
+    elif frequency == 'biweekly':
+        return relativedelta(weeks=2)
+    elif frequency == 'yearly':
+        return relativedelta(years=1)
+    else:
+        raise ValueError('Invalid frequency')
+
+
 @login_required
 def index(request):
     currentYear = datetime.now().year
@@ -83,7 +96,6 @@ def logout_view(request):
 
 @login_required
 def add_transaction(request, year, month, day):
-    # Convert year, month, day to integers
     year = int(year)
     month = int(month)
     day = int(day)
@@ -94,15 +106,17 @@ def add_transaction(request, year, month, day):
             transaction = form.save(commit=False)
             transaction.user = request.user
             transaction.transaction_date = datetime(year, month, day)
-            transaction.frequency = form.cleaned_data['frequency']
+            # Validate and save the frequency if it exists in the form
+            if 'frequency' in form.cleaned_data:
+                transaction.frequency = form.cleaned_data['frequency']
             transaction.save()
 
-            # Check if the transaction is recurring and handle it
+            # Handle recurring transactions
             if transaction.recurring:
                 current_date = transaction.transaction_date
-                end_date = transaction.end_date or current_date + timedelta(days=365)  # Default to one year from transaction date
+                end_date = transaction.end_date or current_date + timedelta(days=365)
                 while current_date <= end_date:
-                    current_date += relativedelta(months=1)
+                    current_date += get_relativedelta(transaction.frequency)
                     new_transaction = Transaction(
                         user=request.user,
                         amount=transaction.amount,
@@ -114,19 +128,14 @@ def add_transaction(request, year, month, day):
                     )
                     new_transaction.save()
 
-            # Redirect after saving
+            # Redirect after successful form submission
             return redirect('add_transaction', year=year, month=month, day=day)
     else:
         form = TransactionForm(initial={'transaction_date': datetime(year, month, day)})
 
-    # Fetch all transactions for the current user and transaction date
     transactions = Transaction.objects.filter(user=request.user, transaction_date=datetime(year, month, day))
-
-    # Separate income and expense transactions
     income_transactions = transactions.filter(is_income=True)
     expense_transactions = transactions.filter(is_income=False)
-
-    # Calculate total income and expense
     total_income = income_transactions.aggregate(total=Sum('amount'))['total'] or 0
     total_expense = expense_transactions.aggregate(total=Sum('amount'))['total'] or 0
     remainder = total_income - total_expense
@@ -144,6 +153,7 @@ def add_transaction(request, year, month, day):
     }
 
     return render(request, 'transactions.html', context)
+
 
 
 
