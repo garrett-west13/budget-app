@@ -1,12 +1,12 @@
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_delete, pre_save
 from django.dispatch import receiver
 from django.contrib.auth.models import User
 from .models import Category, Transaction
 from dateutil.relativedelta import relativedelta
-from django.db.models.signals import pre_delete, pre_save
 from django.utils import timezone
 from django.db import transaction
 from datetime import datetime
+from django.db.models import Q
 
 
 
@@ -20,8 +20,6 @@ def create_savings_category(sender, instance, created, **kwargs):
         Category.objects.create(user=instance, name='Savings')
 
 
-
-
 @receiver(pre_delete, sender=Transaction)
 def handle_delete_recurring_transaction(sender, instance, **kwargs):
     """
@@ -29,9 +27,10 @@ def handle_delete_recurring_transaction(sender, instance, **kwargs):
     """
     if instance.recurring:
         Transaction.objects.filter(
-            user=instance.user,
-            description=instance.description,
-            transaction_date__gte=timezone.now().date()
+            Q(user=instance.user) &
+            Q(description=instance.description) &
+            Q(transaction_date__gte=timezone.now().date()) &
+            Q(frequency=instance.frequency)
         ).delete()
 
 @receiver(pre_save, sender=Transaction)
@@ -43,9 +42,10 @@ def handle_update_recurring_transaction(sender, instance, **kwargs):
         original_transaction = Transaction.objects.get(pk=instance.pk)
         if original_transaction.transaction_date != instance.transaction_date:
             Transaction.objects.filter(
-                user=instance.user,
-                description=instance.description,
-                transaction_date__gte=timezone.now().date()
+                Q(user=instance.user) &
+                Q(description=instance.description) &
+                Q(transaction_date__gte=timezone.now().date()) &
+                Q(frequency=instance.frequency)
             ).update(
                 transaction_date=instance.transaction_date
             )
@@ -53,18 +53,27 @@ def handle_update_recurring_transaction(sender, instance, **kwargs):
 @receiver(post_save, sender=Transaction)
 def handle_recurring_transaction(sender, instance, created, **kwargs):
     """
-    Automatically creates recurring transactions based on the original transaction.
+    Automatically creates or updates recurring transactions based on the original transaction.
     """
-    if created and instance.recurring:
+    if instance.recurring:
         with transaction.atomic():
-            create_recurring_transactions(instance)
+            create_or_update_recurring_transactions(instance)
 
-def create_recurring_transactions(transaction):
+def create_or_update_recurring_transactions(transaction):
     if transaction.recurring:
-        current_date = transaction.transaction_date.date()  # Convert to datetime.date
-        while current_date <= transaction.end_date:
-            # Check if a transaction for the same date and description already exists
-            if not Transaction.objects.filter(user=transaction.user, description=transaction.description, transaction_date=current_date).exists():
+        current_date = transaction.start_date
+        end_date = transaction.end_date
+        existing_transactions = Transaction.objects.filter(
+            Q(user=transaction.user) &
+            Q(description=transaction.description) &
+            Q(transaction_date__range=[current_date, end_date]) &
+            Q(frequency=transaction.frequency)
+        )
+
+        existing_dates = set(existing_transactions.values_list('transaction_date', flat=True))
+
+        while current_date <= end_date:
+            if current_date not in existing_dates:
                 # Create a new transaction based on the original transaction
                 new_transaction = Transaction.objects.create(
                     user=transaction.user,
@@ -72,8 +81,14 @@ def create_recurring_transactions(transaction):
                     description=transaction.description,
                     category=transaction.category,
                     is_income=transaction.is_income,
-                    transaction_date=current_date
+                    transaction_date=current_date,
+                    recurring=transaction.recurring,
+                    frequency=transaction.frequency,
+                    start_date=transaction.start_date,
+                    end_date=transaction.end_date
                 )
+                existing_dates.add(current_date)
+
             # Increment the current date based on the frequency
             if transaction.frequency == 'monthly':
                 current_date += relativedelta(months=1)

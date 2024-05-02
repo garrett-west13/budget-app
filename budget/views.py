@@ -97,18 +97,19 @@ def add_transaction(request, year, month, day):
                 messages.error(request, 'Please select an existing category.')
                 return render(request, 'add_transaction.html', {'form': form})
 
-            end_date = form.cleaned_data.get('end_date')
-            if end_date and end_date <= transaction.transaction_date.date():
-                messages.error(request, 'End date cannot be earlier than transaction date.')
-                return render(request, 'add_transaction.html', {'form': form})
+            if transaction.recurring:
+                end_date = form.cleaned_data.get('end_date')
+                if end_date and end_date <= transaction.transaction_date.date():
+                    messages.error(request, 'End date cannot be earlier than transaction date.')
+                    return render(request, 'add_transaction.html', {'form': form})
 
-            if 'frequency' in form.cleaned_data and transaction.recurring:
-                transaction.frequency = form.cleaned_data['frequency']
-                transaction.start_date = transaction.transaction_date
+                if 'frequency' in form.cleaned_data and transaction.recurring:
+                    transaction.frequency = form.cleaned_data['frequency']
+                    transaction.start_date = transaction.transaction_date
 
             transaction.save()
             messages.success(request, 'Transaction added successfully.')
-            return redirect('add_transaction', year=year, month=month, day=day)
+            return redirect('add_transaction', year=year, month=month, day=day)        
 
     else:
         form = TransactionForm(request.user, initial={'transaction_date': date})
