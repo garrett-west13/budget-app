@@ -6,6 +6,7 @@ from dateutil.relativedelta import relativedelta
 from django.db.models.signals import pre_delete, pre_save
 from django.utils import timezone
 from django.db import transaction
+from datetime import datetime
 
 
 
@@ -32,8 +33,6 @@ def handle_delete_recurring_transaction(sender, instance, **kwargs):
             description=instance.description,
             transaction_date__gte=timezone.now().date()
         ).delete()
-
-
 
 @receiver(pre_save, sender=Transaction)
 def handle_update_recurring_transaction(sender, instance, **kwargs):
@@ -62,7 +61,7 @@ def handle_recurring_transaction(sender, instance, created, **kwargs):
 
 def create_recurring_transactions(transaction):
     if transaction.recurring:
-        current_date = transaction.transaction_date
+        current_date = transaction.transaction_date.date()  # Convert to datetime.date
         while current_date <= transaction.end_date:
             # Check if a transaction for the same date and description already exists
             if not Transaction.objects.filter(user=transaction.user, description=transaction.description, transaction_date=current_date).exists():

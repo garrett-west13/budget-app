@@ -1,23 +1,42 @@
 {% extends 'layout.html' %}
 
+{% load static %}
+
 {% block title %}Transactions{% endblock %}
 
 {% block content %}
+<!-- Transaction Form -->
 <div class="container body form">
     <h1>Add a transaction for {{ transaction_date|date:"F d, Y" }}</h1>
+
+    {% if message %}
+        <div class="alert alert-danger" role="alert">
+            {{ message }}
+        </div>
+    {% endif %}
 
     <form method="post" action="{% url 'add_transaction' transaction_date.year transaction_date.month transaction_date.day %}">
         {% csrf_token %}
         <div class="form-group">
             <label for="amount">Amount:</label>
-            <input type="text" class="form-control" id="amount" name="amount" required>
+            <input type="number step=0.01 min=.01" class="form-control" id="amount" name="amount" placeholder="$0.00" required>
         </div>
 
         <div class="form-group">
             <label for="category">Category:</label>
-            <input type="text" class="form-control" id="category" name="category">
+            <select class="form-control" id="category" name="category">
+                <option value="" selected disabled>Select Existing Category</option>
+                {% for category in form.category.field.queryset %}
+                    <option value="{{ category.id }}">{{ category.name }}</option>
+                {% endfor %}
+            </select>
         </div>
-
+        <div class="form-group">
+                <label for="new_category">Or add new category:</label>
+                <input type="text" class="form-control" id="new_category" name="new_category" placeholder="New Category Name">
+                <button class="btn btn-primary mb-2 mt-2" type="button" id="add-category">Add Category</button>
+        </div>
+        
         <div class="form-group">
             <label for="description">Description:</label>
             <textarea class="form-control" id="description" name="description"></textarea>
@@ -39,11 +58,9 @@
         </div>
 
         <div class="form-group" id="endDateField">
-            <label for="end_date">End Date:</label>
-            <input type="date" class="form-control" id="end_date" name="end_date">
+            <label for="{{ form.end_date.id_for_label }}">End Date:</label>
+            {{ form.end_date }}
         </div>
-        
-        
 
         <div class="form-group">
             <label>Income or Expense:</label>
@@ -52,121 +69,105 @@
             {% endfor %}
         </div>
 
-        <input type="hidden" name="transaction_date" value="{{ transaction_date }}">
+        <input type="hidden" name="transaction_date" value="{{ transaction_date|date:'Y-m-d' }}">
 
         <button class="btn btn-primary" type="submit">Add Transaction</button>
     </form>
 </div>
 
 
-
+<!-- Transaction Tables -->
 <div class="container" id="transactions">
     <h2>Transactions for {{ transaction_date|date:"F d, Y" }}</h2>
-    {% if income_transactions %}
-        <!-- Income Transactions Table -->
-        <div class="transaction-table">
-            <h3>Income Transactions</h3>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Category</th>
-                        <th>Amount</th>
-                        <th>Description</th>
-                        <th>Date</th>
-                        <th>Recurring</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for transaction in income_transactions %}
-                        <tr>
-                            <td>{{ transaction.category.name }}</td>
-                            <td>${{ transaction.amount }}</td>
-                            <td>{{ transaction.description }}</td>
-                            <td>{{ transaction.transaction_date|date:"F d, Y" }}</td>
-                            <td>{% if transaction.recurring %}Yes{% else %}No{% endif %}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <div class="row">
+        <div class="col-md-6">
+            {% if income_transactions %}
+                <!-- Income Transactions Table -->
+                <div class="transaction-table">
+                    <h3>Income Transactions</h3>
+                    <table class="income-transactions-table">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Amount</th>
+                                <th>Description</th>
+                                <th>Date</th>
+                                <th>Recurring</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for transaction in income_transactions %}
+                                <tr>
+                                    <td>{{ transaction.category.name }}</td>
+                                    <td>${{ transaction.amount }}</td>
+                                    <td>{{ transaction.description }}</td>
+                                    <td>{{ transaction.transaction_date|date:"F d, Y" }}</td>
+                                    <td>{% if transaction.recurring %}Yes, {{ transaction.end_date|date:"F d, Y" }}{% else %}No{% endif %}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p>No income transactions found</p>
+            {% endif %}
         </div>
-    {% elif expense_transactions %}
-        <!-- Expense Transactions Table -->
-        <div class="transaction-table">
-            <h3>Expense Transactions</h3>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Category</th>
-                        <th>Amount</th>
-                        <th>Description</th>
-                        <th>Date</th>
-                        <th>Recurring</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for transaction in expense_transactions %}
-                        <tr>
-                            <td>{{ transaction.category.name }}</td>
-                            <td>${{ transaction.amount }}</td>
-                            <td>{{ transaction.description }}</td>
-                            <td>{{ transaction.transaction_date|date:"F d, Y" }}</td>
-                            <td>{% if transaction.recurring %}Yes{% else %}No{% endif %}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="col-md-6">
+            {% if expense_transactions %}
+                <!-- Expense Transactions Table -->
+                <div class="transaction-table">
+                    <h3>Expense Transactions</h3>
+                    <table class="expense-transactions-table">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Amount</th>
+                                <th>Description</th>
+                                <th>Date</th>
+                                <th>Recurring</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for transaction in expense_transactions %}
+                                <tr>
+                                    <td>{{ transaction.category.name }}</td>
+                                    <td>${{ transaction.amount }}</td>
+                                    <td>{{ transaction.description }}</td>
+                                    <td>{{ transaction.transaction_date|date:"F d, Y" }}</td>
+                                    <td>{% if transaction.recurring %}Yes{% else %}No{% endif %}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p>No expense transactions found</p>
+            {% endif %}
         </div>
-
-    {% else %}
-        <p>No transactions found</p>
-    {% endif %}
+    </div>
+</div>
 
     <!-- Total Income and Expense -->
     <div class="monthly-overview-container mb-5">
         <div class="expenses">
-            <h2>Total Expenses</h2>
+            <h2>Total Daily Expenses</h2>
             <p>${{ total_expenses }}</p>
         </div>
         <div class="income">
-            <h2>Total Income</h2>
+            <h2>Total Daily Income</h2>
             <p>${{ total_income }}</p>
         </div>
         <div class="balance">
-            <h2>Total Balance</h2>
-            <p>{% if total_balance > 0 %}<span class="surplus">$+{{ total_balance }}</span>{% else %}<span class="deficit">${{ total_balance }}</span>{% endif %}</p>
+            <h2>Total Daily Balance</h2>
+            <p>{% if total_balance > 0 %}<span class="surplus">$+{{ balance }}</span>{% else %}<span class="deficit">${{ balance }}</span>{% endif %}</p>
         </div>
         <div class="savings">
-            <h2>Total Savings</h2>
-            <p>${{ total_savings }}</p>
+            <h2>Total Daily Savings</h2>
+            <p>${{ savings }}</p>
         </div>        
     </div>  
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-    // Get the recurring checkbox element
-    const recurringCheckbox = document.getElementById('id_recurring');
-
-    // Get the frequency select field element
-    const frequencyField = document.getElementById('frequencyField');
-    const endDateField = document.getElementById('endDateField');
-
-    // Hide the frequency field initially
-    frequencyField.style.display = 'none';
-    endDateField.style.display = 'none';
-
-    // Add an event listener to the recurring checkbox
-    recurringCheckbox.addEventListener('change', function() {
-        // If the recurring checkbox is checked, show the frequency field, otherwise hide it
-        if (this.checked) {
-            frequencyField.style.display = 'block';
-            endDateField.style.display = 'block';
-        } else {
-            frequencyField.style.display = 'none';
-            endDateField.style.display = 'none';
-        }
-    });
-});
-</script>
+<script src="{% static 'transactions.js' %}"></script>
 {% endblock %}
 

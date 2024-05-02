@@ -8,4 +8,5 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('add_transaction/<int:year>/<int:month>/<int:day>', views.add_transaction, name='add_transaction'),
     path('calendar/<int:year>/<int:month>/', views.calendar, name='calendar'),
+    path('create_category/', views.create_category, name='create_category'),
 ]

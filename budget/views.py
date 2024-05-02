@@ -1,3 +1,4 @@
+import json
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .forms import RegistrationForm, TransactionForm
@@ -10,23 +11,9 @@ from datetime import datetime
 from .models import Transaction, Category, Goal
 from django.http import JsonResponse
 from django.http import HttpResponse
-from django.db.models import Sum
-from django.utils import timezone
+from django.db.models import Sum, F
 from dateutil.relativedelta import relativedelta
 from datetime import timedelta
-
-
-def get_relativedelta(frequency):
-    if frequency == 'monthly':
-        return relativedelta(months=1)
-    elif frequency == 'weekly':
-        return relativedelta(weeks=1)
-    elif frequency == 'biweekly':
-        return relativedelta(weeks=2)
-    elif frequency == 'yearly':
-        return relativedelta(years=1)
-    else:
-        raise ValueError('Invalid frequency')
 
 
 @login_required
@@ -96,66 +83,84 @@ def logout_view(request):
 
 @login_required
 def add_transaction(request, year, month, day):
-    year = int(year)
-    month = int(month)
-    day = int(day)
+    date = datetime(year, month, day)
 
     if request.method == 'POST':
-        form = TransactionForm(request.POST)
+        form = TransactionForm(request.user, request.POST)
         if form.is_valid():
             transaction = form.save(commit=False)
             transaction.user = request.user
-            transaction.transaction_date = datetime(year, month, day)
-            # Validate and save the frequency if it exists in the form
-            if 'frequency' in form.cleaned_data:
+            transaction.transaction_date = date
+            category_id = form.cleaned_data.get('category')
+
+            if not category_id:
+                messages.error(request, 'Please select an existing category.')
+                return render(request, 'add_transaction.html', {'form': form})
+
+            end_date = form.cleaned_data.get('end_date')
+            if end_date and end_date <= transaction.transaction_date.date():
+                messages.error(request, 'End date cannot be earlier than transaction date.')
+                return render(request, 'add_transaction.html', {'form': form})
+
+            if 'frequency' in form.cleaned_data and transaction.recurring:
                 transaction.frequency = form.cleaned_data['frequency']
+                transaction.start_date = transaction.transaction_date
+
             transaction.save()
-
-            # Handle recurring transactions
-            if transaction.recurring:
-                current_date = transaction.transaction_date
-                end_date = transaction.end_date or current_date + timedelta(days=365)
-                while current_date <= end_date:
-                    current_date += get_relativedelta(transaction.frequency)
-                    new_transaction = Transaction(
-                        user=request.user,
-                        amount=transaction.amount,
-                        category=transaction.category,
-                        description=transaction.description,
-                        recurring=False, 
-                        is_income=transaction.is_income,
-                        transaction_date=current_date
-                    )
-                    new_transaction.save()
-
-            # Redirect after successful form submission
+            messages.success(request, 'Transaction added successfully.')
             return redirect('add_transaction', year=year, month=month, day=day)
-    else:
-        form = TransactionForm(initial={'transaction_date': datetime(year, month, day)})
 
-    transactions = Transaction.objects.filter(user=request.user, transaction_date=datetime(year, month, day))
+    else:
+        form = TransactionForm(request.user, initial={'transaction_date': date})
+
+    transactions = Transaction.objects.filter(user=request.user, transaction_date=date)
     income_transactions = transactions.filter(is_income=True)
     expense_transactions = transactions.filter(is_income=False)
     total_income = income_transactions.aggregate(total=Sum('amount'))['total'] or 0
     total_expense = expense_transactions.aggregate(total=Sum('amount'))['total'] or 0
-    remainder = total_income - total_expense
-    total_savings = 0
+    balance = total_income - total_expense
+    savings = expense_transactions.filter(category__name='Savings').aggregate(total=Sum('amount'))['total'] or 0
 
     context = {
-        'transaction_date': datetime(year, month, day),
+        'transaction_date': date,
         'form': form,
         'income_transactions': income_transactions,
         'expense_transactions': expense_transactions,
         'total_income': total_income,
         'total_expenses': total_expense,
-        'total_balance': remainder,
-        'total_savings': total_savings,
+        'balance': balance,
+        'savings': savings,
     }
 
     return render(request, 'transactions.html', context)
 
 
+@login_required
+def create_category(request):
+    if request.method == 'POST':
+        try:
+            # Parse JSON data from the request body
+            data = json.loads(request.body)
+            category_name = data.get('name')
 
+            # Validate category_name (e.g., check for empty string)
+            if not category_name:
+                raise ValueError('Category name is missing or empty')
+
+            # Create a new category
+            category = Category.objects.create(name=category_name, user=request.user)
+
+            # Return a success response with the created category data
+            return JsonResponse({'id': category.id, 'name': category.name})
+
+        except Exception as e:
+            # Return an error response with an appropriate message
+            return JsonResponse({'error': str(e)}, status=400)
+
+    else:
+        # Return a method not allowed response if the request method is not POST
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+        
 
 def calendar(request, year, month):
     calendar = Calendar()

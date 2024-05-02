@@ -164,8 +164,55 @@ table td.current-day:hover {
     color: #cc9933;
 }
 
+.surplus {
+    color: green;
+}
 
-/* Add spacing between tables and align them horizontally */
+.deficit {
+    color: red;
+}
+
+/* Add a red dot next to the day with a transaction */
+.day.expense-dot .cell-content::after {
+    content: "•";
+    color: red;
+    position: relative;
+    bottom: -20px;
+    right: 25px;
+    transform: translateX(-50%);
+}
+
+.day.income-dot .cell-content::after {
+    content: "•";
+    color: green;
+    position: relative;
+    bottom: -20px; 
+    right: 5px;
+    transform: translateX(-50%);
+}
+
+
+
+/* Style checkbox */
+.form-group input[type="checkbox"] {
+    width: 30px; 
+    height: 30px; 
+    border: 1px solid #999; 
+    border-radius: 3px; 
+    margin-bottom: 5px;
+}
+
+/* Transaction-table */
+#transactions {
+    margin-top: 50px;
+    margin-bottom: 50px;
+}
+
+#transactions h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
 .transaction-table {
     margin-bottom: 30px;
 }
@@ -190,32 +237,37 @@ table td.current-day:hover {
     background-color: #f5f5f5;
 }
 
-.surplus {
-    color: green;
+.expense-transactions-table,
+.income-transactions-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 2px solid #ddd;
+    border-radius: 5px;
 }
 
-.deficit {
-    color: red;
+.expense-transactions-table th,
+.income-transactions-table th,
+.expense-transactions-table td,
+.income-transactions-table td {
+    padding: 10px;
+    text-align: left;
 }
 
-/* Add a red dot next to the day with a transaction */
-.day.transaction-day::after {
-    content: "•";
-    color: red;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+.expense-transactions-table th,
+.income-transactions-table th {
+    background-color: #f2f2f2;
+    font-size: 18px;
 }
 
-/* Style checkbox */
-.form-group input[type="checkbox"] {
-    width: 30px; 
-    height: 30px; 
-    border: 1px solid #999; 
-    border-radius: 3px; 
-    margin-bottom: 5px;
+.expense-transactions-table tbody tr:hover,
+.income-transactions-table tbody tr:hover {
+    background-color: #f5f5f5;
 }
 
+#frequencyField {
+    display: none;
+}
 
-
+#endDateField {
+    display: none;
+}

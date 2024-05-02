@@ -72,7 +72,21 @@ class Calendar(HTMLCalendar):
                     url = reverse('add_transaction', args=(date.year, date.month, date.day))
                     cell_class = 'current-day' if date.date() == current_date else 'day'
                     has_transactions = 'transaction-day' if days_with_transactions[current_day] else ''
-                    html_code += f"    <td class='{self.cssclasses[day]} {cell_class} {has_transactions}' id='day-{date.strftime('%Y-%m-%d')}'><a class='day-link' href='{url}'><div class='cell-content'>{current_day}</div></a></td>\n"
+                    
+                    dots = ''
+                    if days_with_transactions[current_day]:
+                        # If there are transactions for the current day
+                        for transaction in transactions:
+                            if transaction.transaction_date.day == current_day:
+                                if transaction.is_income:
+                                    dots += 'income-dot'
+                                else:
+                                    dots += 'expense-dot'
+                    else:
+                        # If there are no transactions for the current day
+                        dots = ''
+
+                    html_code += f"    <td class='{self.cssclasses[day]} {cell_class} {has_transactions} {dots}' id='day-{date.strftime('%Y-%m-%d')}'><a class='day-link' href='{url}'><div class='cell-content'>{current_day}</div></a></td>\n"
             html_code += "  </tr>\n"
 
         html_code += "</table>\n"
