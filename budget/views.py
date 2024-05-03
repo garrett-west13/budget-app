@@ -9,11 +9,11 @@ from django.contrib.auth.forms import AuthenticationForm
 from .calendar import Calendar
 from datetime import datetime
 from .models import Transaction, Category, Goal
-from django.http import JsonResponse
-from django.http import HttpResponse
+from django.http import JsonResponse, Http404, HttpResponse
 from django.db.models import Sum, F
 from dateutil.relativedelta import relativedelta
 from datetime import timedelta
+from django.urls import reverse
 
 
 @login_required
@@ -83,47 +83,58 @@ def logout_view(request):
 
 @login_required
 def add_transaction(request, year, month, day):
-    date = datetime(year, month, day)
+    try:
+        date = datetime(year, month, day)
+    except ValueError:
+        raise Http404("Invalid date")
 
     if request.method == 'POST':
         form = TransactionForm(request.user, request.POST)
         if form.is_valid():
             transaction = form.save(commit=False)
             transaction.user = request.user
-            transaction.transaction_date = date
-            category_id = form.cleaned_data.get('category')
 
-            if not category_id:
-                messages.error(request, 'Please select an existing category.')
-                return render(request, 'add_transaction.html', {'form': form})
-
+            # Validate and set frequency and start date for recurring transactions
             if transaction.recurring:
                 end_date = form.cleaned_data.get('end_date')
-                if end_date and end_date <= transaction.transaction_date.date():
-                    messages.error(request, 'End date cannot be earlier than transaction date.')
-                    return render(request, 'add_transaction.html', {'form': form})
+                frequency = form.cleaned_data.get('frequency')
+                if not end_date or not frequency:
+                    messages.error(request, 'Please provide both end date and frequency for recurring transactions.')
+                    return render(request, 'transactions.html', {'form': form})
 
-                if 'frequency' in form.cleaned_data and transaction.recurring:
-                    transaction.frequency = form.cleaned_data['frequency']
-                    transaction.start_date = transaction.transaction_date
+                # Set the transaction's frequency and start date
+                transaction.frequency = frequency
+                transaction.start_date = date
 
-            transaction.save()
-            messages.success(request, 'Transaction added successfully.')
-            return redirect('add_transaction', year=year, month=month, day=day)        
+                # Save the transaction
+                transaction.save()
+
+                messages.success(request, 'Recurring transaction added successfully.')
+                return redirect('transaction_list')  # Redirect to transaction list view or any other appropriate URL
+            else:
+                # Process non-recurring transaction
+                end_date = None
+                transaction.save()
+                messages.success(request, 'Transaction added successfully.')
+                return redirect('add_transaction', year=year, month=month, day=day)
 
     else:
         form = TransactionForm(request.user, initial={'transaction_date': date})
 
+
+    # Retrieve transactions for the selected date
     transactions = Transaction.objects.filter(user=request.user, transaction_date=date)
     income_transactions = transactions.filter(is_income=True)
     expense_transactions = transactions.filter(is_income=False)
-    total_income = income_transactions.aggregate(total=Sum('amount'))['total'] or 0
-    total_expense = expense_transactions.aggregate(total=Sum('amount'))['total'] or 0
-    balance = total_income - total_expense
-    savings = expense_transactions.filter(category__name='Savings').aggregate(total=Sum('amount'))['total'] or 0
 
+    # Calculate total income, expenses, balance, and savings
+    total_income = round(income_transactions.aggregate(total=Sum('amount'))['total'] or 0, 2)
+    total_expense = round(expense_transactions.aggregate(total=Sum('amount'))['total'] or 0, 2)
+    balance = round(total_income - total_expense, 2)
+    savings = round(expense_transactions.filter(category__name='Savings').aggregate(total=Sum('amount'))['total'] or 0, 2)
     context = {
         'transaction_date': date,
+        'end_date': date + timedelta(days=365),
         'form': form,
         'income_transactions': income_transactions,
         'expense_transactions': expense_transactions,
@@ -132,8 +143,10 @@ def add_transaction(request, year, month, day):
         'balance': balance,
         'savings': savings,
     }
-
     return render(request, 'transactions.html', context)
+
+
+
 
 
 @login_required
@@ -142,7 +155,7 @@ def create_category(request):
         try:
             # Parse JSON data from the request body
             data = json.loads(request.body)
-            category_name = data.get('name')
+            category_name = data.get('name').capitalize()
 
             # Validate category_name (e.g., check for empty string)
             if not category_name:
@@ -168,3 +181,15 @@ def calendar(request, year, month):
     calendar_html = calendar.formatmonth(year, month)
     return HttpResponse(calendar_html)
     
+@login_required
+def transaction_list(request):
+    # Retrieve all transactions for the logged-in user
+    transactions = Transaction.objects.filter(user=request.user)
+
+    # You may want to order the transactions by date or any other criteria
+    # transactions = transactions.order_by('-transaction_date')
+
+    context = {
+        'transactions': transactions,
+    }
+    return render(request, 'transaction_list.html', context)

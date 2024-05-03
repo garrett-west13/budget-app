@@ -61,21 +61,23 @@ def handle_recurring_transaction(sender, instance, created, **kwargs):
 
 def create_or_update_recurring_transactions(transaction):
     if transaction.recurring:
-        current_date = transaction.start_date
+        current_date = transaction.transaction_date
         end_date = transaction.end_date
         existing_transactions = Transaction.objects.filter(
-            Q(user=transaction.user) &
-            Q(description=transaction.description) &
-            Q(transaction_date__range=[current_date, end_date]) &
-            Q(frequency=transaction.frequency)
+        Q(user=transaction.user) &
+        Q(description=transaction.description) &
+        Q(transaction_date__gte=current_date) & 
+        Q(transaction_date__lte=end_date) &
+        Q(frequency=transaction.frequency)
         )
+
 
         existing_dates = set(existing_transactions.values_list('transaction_date', flat=True))
 
+        new_transactions = []
         while current_date <= end_date:
             if current_date not in existing_dates:
-                # Create a new transaction based on the original transaction
-                new_transaction = Transaction.objects.create(
+                new_transaction = Transaction(
                     user=transaction.user,
                     amount=transaction.amount,
                     description=transaction.description,
@@ -87,6 +89,7 @@ def create_or_update_recurring_transactions(transaction):
                     start_date=transaction.start_date,
                     end_date=transaction.end_date
                 )
+                new_transactions.append(new_transaction)
                 existing_dates.add(current_date)
 
             # Increment the current date based on the frequency
@@ -98,3 +101,16 @@ def create_or_update_recurring_transactions(transaction):
                 current_date += relativedelta(weeks=2)
             elif transaction.frequency == 'yearly':
                 current_date += relativedelta(years=1)
+
+        # Bulk create the new transactions outside of the loop
+        with transaction.atomic():
+            new_transactions = Transaction.objects.bulk_create(new_transactions)
+        
+        # Set the recurring field of the last transaction to False if its date matches the end date
+        if new_transactions and new_transactions[-1].transaction_date >= end_date:
+            last_transaction = new_transactions[-1]
+            last_transaction.recurring = False
+            # Use update() to avoid triggering post_save signal
+            Transaction.objects.filter(pk=last_transaction.pk).update(recurring=False)
+
+        

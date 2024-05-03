@@ -1,0 +1,11 @@
+{% extends 'layout.html' %}
+
+{% block title %}Transaction List{% endblock %}
+{% block content %}
+    <h1>Transaction List</h1>
+    <ul>
+    {% for transaction in transactions %}
+        <li>{{ transaction.description }} - {{ transaction.amount }}</li>
+    {% endfor %}
+    </ul>
+{% endblock %}

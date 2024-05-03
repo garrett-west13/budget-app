@@ -7,7 +7,7 @@
 {% block content %}
 <!-- Transaction Form -->
 <div class="container body form">
-    <h1>Add a transaction for {{ transaction_date|date:"F d, Y" }}</h1>
+    <h2>Add a transaction for {{ transaction_date|date:"F d, Y" }}</h2>
 
     {% if message %}
         <div class="alert alert-danger" role="alert">
@@ -15,7 +15,9 @@
         </div>
     {% endif %}
 
-    <form method="post" action="{% url 'add_transaction' transaction_date.year transaction_date.month transaction_date.day %}">
+    <form method="post" action="{% url 'add_transaction' year=transaction_date.year month=transaction_date.month day=transaction_date.day %}">
+
+
         {% csrf_token %}
         <div class="form-group">
             <label for="amount">Amount:</label>
@@ -59,7 +61,8 @@
 
         <div class="form-group" id="endDateField">
             <label for="{{ form.end_date.id_for_label }}">End Date:</label>
-            {{ form.end_date }}
+            <input type="date" class="form-control" id="id_end_date" name="end_date" value="{{ end_date|date:'Y-m-d' }}">
+            <small class="form-text text-muted">Default is one year from start date</small>
         </div>
 
         <div class="form-group">
@@ -69,7 +72,7 @@
             {% endfor %}
         </div>
 
-        <input type="hidden" name="transaction_date" value="{{ transaction_date|date:'Y-m-d' }}">
+        <input hidden type="date" name="transaction_date" value="{{ transaction_date|date:'Y-m-d' }}">
 
         <button class="btn btn-primary" type="submit">Add Transaction</button>
     </form>
@@ -150,19 +153,19 @@
     <!-- Total Income and Expense -->
     <div class="monthly-overview-container mb-5">
         <div class="expenses">
-            <h2>Total Daily Expenses</h2>
+            <h2>Daily Expenses</h2>
             <p>${{ total_expenses }}</p>
         </div>
         <div class="income">
-            <h2>Total Daily Income</h2>
+            <h2>Daily Income</h2>
             <p>${{ total_income }}</p>
         </div>
         <div class="balance">
-            <h2>Total Daily Balance</h2>
+            <h2>Daily Balance</h2>
             <p>{% if total_balance > 0 %}<span class="surplus">$+{{ balance }}</span>{% else %}<span class="deficit">${{ balance }}</span>{% endif %}</p>
         </div>
         <div class="savings">
-            <h2>Total Daily Savings</h2>
+            <h2>Daily Savings</h2>
             <p>${{ savings }}</p>
         </div>        
     </div>  

@@ -271,3 +271,7 @@ table td.current-day:hover {
 #endDateField {
     display: none;
 }
+
+.transaction-table td {
+    font-size: 16px;   
+}
