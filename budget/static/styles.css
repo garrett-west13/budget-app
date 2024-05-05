@@ -172,25 +172,54 @@ table td.current-day:hover {
     color: red;
 }
 
-/* Add a red dot next to the day with a transaction */
-.day.expense-dot .cell-content::after {
-    content: "•";
-    color: red;
-    position: relative;
-    bottom: -20px;
-    right: 25px;
-    transform: translateX(-50%);
-}
 
-.day.income-dot .cell-content::after {
-    content: "•";
+
+/* Add income and expense dots */
+.day.income-dot.expense-dot .cell-content::after {
+    content: "•";  /* Income dot */
     color: green;
     position: relative;
-    bottom: -20px; 
-    right: 5px;
+    bottom: -23px; 
+    right: 10px;
     transform: translateX(-50%);
 }
 
+/* Show the income dot */
+.day.income-dot .cell-content::after {
+    content: "•";  /* Income dot */
+    color: green;
+    position: relative;
+    bottom: -23px; 
+    right: 10px;
+    transform: translateX(-50%);
+}
+
+/* Show the expense dot */
+.day.expense-dot .cell-content::before {
+    content: "•";  /* Expense dot */
+    color: red;
+    position: relative;
+    bottom: -23px; 
+    left: 10px; 
+    transform: translateX(-50%);
+}
+
+
+
+
+
+.help-block {
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.expense-dot {
+    color: red;
+}
+
+.income-dot {
+    color: green;
+}
 
 
 /* Style checkbox */

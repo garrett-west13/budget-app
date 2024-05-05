@@ -5,6 +5,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const inputField = document.getElementById('new_category');
     const selectField = document.getElementById('category');
 
+
+    document.getElementById('id_recurring').addEventListener('change', function() {
+        if (!this.checked) {
+            this.removeAttribute('required');
+        } else {
+            this.setAttribute('required', 'required');
+        }
+    });
+
     // Function to handle the recurring checkbox change event
     function handleRecurringChange() {
         frequencyField.style.display = recurringCheckbox.checked ? 'block' : 'none';

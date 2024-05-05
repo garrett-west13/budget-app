@@ -21,6 +21,7 @@ class Transaction(models.Model):
     frequency = models.CharField(max_length=10, null=True, blank=True)  # e.g., 'monthly', 'weekly', 
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
+    original_transaction = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return self.description

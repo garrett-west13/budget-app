@@ -24,9 +24,11 @@ class TransactionForm(forms.ModelForm):
 
     class Meta:
         model = Transaction
-        fields = ['amount', 'category', 'description', 'transaction_date', 'recurring', 'is_income', 'end_date']
+        fields = ['amount', 'category', 'description', 'transaction_date', 'recurring', 'is_income', 'end_date', 'frequency', 'start_date']
         widgets = {
-            'recurring': forms.CheckboxInput(),
+            'recurring': forms.CheckboxInput(attrs={}),
             'is_income': forms.RadioSelect(choices=[(True, 'Income'), (False, 'Expense')]),
-            'end_date': forms.DateInput(attrs={'type': 'date', 'required': 'False'}),
+            'end_date': forms.DateInput(attrs={'type': 'date'}),
+            'frequency': forms.Select(attrs={}),
+            'start_date': forms.DateInput(attrs={'type': 'date'}),
         }

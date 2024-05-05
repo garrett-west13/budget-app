@@ -18,21 +18,20 @@ from django.urls import reverse
 
 @login_required
 def index(request):
-    currentYear = datetime.now().year
-    currentMonth = datetime.now().month
+    currentDate = datetime.now()
+    currentYear = currentDate.year
+    currentMonth = currentDate.month
 
-    # Fetch dynamic data for monthly overview
-    total_expenses = Transaction.objects.filter(date__year=currentYear, date__month=currentMonth).aggregate(Sum('amount'))['amount__sum']
-    total_income = 0  
-    total_expenses = total_expenses or 0  
-    total_balance = total_income - total_expenses
-    total_savings = 0  
+    storedMonth = request.session.get('selectedMonth')
+    storedYear = request.session.get('selectedYear')
+
+    if storedMonth and storedYear:
+        currentMonth = int(storedMonth)
+        currentYear = int(storedYear)
 
     context = {
-        'total_expenses': total_expenses,
-        'total_income': total_income,
-        'total_balance': total_balance,
-        'total_savings': total_savings,
+        'currentYear': currentYear,
+        'currentMonth': currentMonth
     }
 
     return render(request, 'index.html', context)
@@ -96,6 +95,8 @@ def add_transaction(request, year, month, day):
 
             # Validate and set frequency and start date for recurring transactions
             if transaction.recurring:
+                original_transaction = Transaction.objects.get(pk=transaction.pk)
+                transaction.original_transaction = original_transaction
                 end_date = form.cleaned_data.get('end_date')
                 frequency = form.cleaned_data.get('frequency')
                 if not end_date or not frequency:
@@ -110,10 +111,10 @@ def add_transaction(request, year, month, day):
                 transaction.save()
 
                 messages.success(request, 'Recurring transaction added successfully.')
-                return redirect('transaction_list')  # Redirect to transaction list view or any other appropriate URL
+                return redirect('recurring_transactions')  # Redirect to transaction list view or any other appropriate URL
             else:
                 # Process non-recurring transaction
-                end_date = None
+                transaction.end_date = None
                 transaction.save()
                 messages.success(request, 'Transaction added successfully.')
                 return redirect('add_transaction', year=year, month=month, day=day)
@@ -142,6 +143,10 @@ def add_transaction(request, year, month, day):
         'total_expenses': total_expense,
         'balance': balance,
         'savings': savings,
+        'year': year,
+        'month': month,
+        'day': day,
+        'messages': messages
     }
     return render(request, 'transactions.html', context)
 
@@ -193,3 +198,14 @@ def transaction_list(request):
         'transactions': transactions,
     }
     return render(request, 'transaction_list.html', context)
+
+@login_required
+def recurring_transactions(request):
+    # Query the database to retrieve distinct original transactions
+    original_transactions = Transaction.objects.filter(user=request.user, recurring=True, original_transaction__isnull=True).distinct()
+
+    context = {
+        'original_transactions': original_transactions
+    }
+
+    return render(request, 'recurring_transactions.html', context)

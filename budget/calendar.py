@@ -76,15 +76,15 @@ class Calendar(HTMLCalendar):
                     dots = ''
                     if days_with_transactions[current_day]:
                         # If there are transactions for the current day
-                        for transaction in transactions:
-                            if transaction.transaction_date.day == current_day:
-                                if transaction.is_income:
-                                    dots += 'income-dot'
-                                else:
-                                    dots += 'expense-dot'
-                    else:
-                        # If there are no transactions for the current day
-                        dots = ''
+                        income_transactions = [transaction for transaction in transactions if transaction.transaction_date.day == current_day and transaction.is_income]
+                        expense_transactions = [transaction for transaction in transactions if transaction.transaction_date.day == current_day and not transaction.is_income]
+                        
+                        if income_transactions and expense_transactions:
+                            dots = 'income-dot expense-dot'
+                        elif income_transactions:
+                            dots = 'income-dot'
+                        elif expense_transactions:
+                            dots = 'expense-dot'
 
                     html_code += f"    <td class='{self.cssclasses[day]} {cell_class} {has_transactions} {dots}' id='day-{date.strftime('%Y-%m-%d')}'><a class='day-link' href='{url}'><div class='cell-content'>{current_day}</div></a></td>\n"
             html_code += "  </tr>\n"

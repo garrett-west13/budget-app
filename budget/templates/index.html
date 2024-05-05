@@ -5,6 +5,7 @@
 {% block title %}Budgeting App{% endblock %}
 
 {% block content %}
+<div class="help-block text-right mr-4 mt-2 text-muted">A red <span class="expense-dot">•</span> indicates an expense. A green <span class="income-dot">•</span> indicates an income.</div>
 <div class="container">
     {% if not user.is_authenticated %}
     <div class="jumbotron mt-5">

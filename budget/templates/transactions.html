@@ -6,17 +6,17 @@
 
 {% block content %}
 <!-- Transaction Form -->
+<a href="{% url 'index' %}" class="btn btn-secondary mt-3 ml-3 text-left">&larr; Back</a>
 <div class="container body form">
     <h2>Add a transaction for {{ transaction_date|date:"F d, Y" }}</h2>
 
     {% if message %}
-        <div class="alert alert-danger" role="alert">
+        <div class="alert alert-danger mt-3" role="alert">
             {{ message }}
         </div>
     {% endif %}
 
-    <form method="post" action="{% url 'add_transaction' year=transaction_date.year month=transaction_date.month day=transaction_date.day %}">
-
+    <form method="post" action="{% url 'add_transaction' year=year month=month day=day %}">
 
         {% csrf_token %}
         <div class="form-group">
@@ -162,7 +162,7 @@
         </div>
         <div class="balance">
             <h2>Daily Balance</h2>
-            <p>{% if total_balance > 0 %}<span class="surplus">$+{{ balance }}</span>{% else %}<span class="deficit">${{ balance }}</span>{% endif %}</p>
+            <p>{% if balance > 0 %}<span class="surplus">+${{ balance }}</span>{% else %}<span class="deficit">-${{ balance }}</span>{% endif %}</p>
         </div>
         <div class="savings">
             <h2>Daily Savings</h2>

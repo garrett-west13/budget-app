@@ -64,13 +64,12 @@ def create_or_update_recurring_transactions(transaction):
         current_date = transaction.transaction_date
         end_date = transaction.end_date
         existing_transactions = Transaction.objects.filter(
-        Q(user=transaction.user) &
-        Q(description=transaction.description) &
-        Q(transaction_date__gte=current_date) & 
-        Q(transaction_date__lte=end_date) &
-        Q(frequency=transaction.frequency)
+            Q(user=transaction.user) &
+            Q(description=transaction.description) &
+            Q(transaction_date__gte=current_date) & 
+            Q(transaction_date__lte=end_date) &
+            Q(frequency=transaction.frequency)
         )
-
 
         existing_dates = set(existing_transactions.values_list('transaction_date', flat=True))
 
@@ -84,10 +83,11 @@ def create_or_update_recurring_transactions(transaction):
                     category=transaction.category,
                     is_income=transaction.is_income,
                     transaction_date=current_date,
-                    recurring=transaction.recurring,
+                    recurring=True,  
                     frequency=transaction.frequency,
                     start_date=transaction.start_date,
-                    end_date=transaction.end_date
+                    end_date=transaction.end_date,
+                    original_transaction=transaction 
                 )
                 new_transactions.append(new_transaction)
                 existing_dates.add(current_date)

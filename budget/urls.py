@@ -10,4 +10,5 @@ urlpatterns = [
     path('calendar/<int:year>/<int:month>/', views.calendar, name='calendar'),
     path('create_category/', views.create_category, name='create_category'),
     path('transaction_list/', views.transaction_list, name='transaction_list'),
+    path('recurring_transactions/', views.recurring_transactions, name='recurring_transactions'),
 ]
