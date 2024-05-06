@@ -5,7 +5,6 @@
 {% block title %}Budgeting App{% endblock %}
 
 {% block content %}
-<div class="help-block text-right mr-4 mt-2 text-muted">A red <span class="expense-dot">•</span> indicates an expense. A green <span class="income-dot">•</span> indicates an income.</div>
 <div class="container">
     {% if not user.is_authenticated %}
     <div class="jumbotron mt-5">
@@ -17,6 +16,7 @@
         <a class="btn btn-success btn-lg" href="{% url 'register' %}" role="button">Register</a>
     </div>
     {% else %}
+    <div class="help-block text-right mr-4 mt-2 text-muted">A red <span class="expense-dot">•</span> indicates an expense. A green <span class="income-dot">•</span> indicates an income.</div>
     <div id="calendar-container" class="calendar-container">
         <div class="d-flex justify-content-between mb-2">
             <button type="button" class="btn btn-primary ml-2 mb-2" id="prev-month">Previous Month</button>
@@ -32,21 +32,22 @@
     <div class="monthly-overview-container">
         <div class="expenses">
             <h2>Total Expenses</h2>
-            <p>${{ total_expenses }}</p>
+            <p id="total-expenses">Loading...</p>
         </div>
         <div class="income">
             <h2>Total Income</h2>
-            <p>${{ total_income }}</p>
+            <p id="total-income">Loading...</p>
         </div>
         <div class="balance">
             <h2>Total Balance</h2>
-            <p>{% if total_balance > 0 %}<span class="surplus">$+{{ total_balance }}</span>{% else %}<span class="deficit">$-{{ total_balance }}</span>{% endif %}</p>
+            <p id="total-balance">Loading...</p>
         </div>
         <div class="savings">
             <h2>Total Savings</h2>
-            <p>${{ total_savings }}</p>
+            <p id="total-savings">Loading...</p>
         </div>        
+    </div>      
     </div>    
-    {% endif %} 
     <script src="{% static 'script.js' %}"></script> 
+    {% endif %}
 {% endblock %}

@@ -11,4 +11,7 @@ urlpatterns = [
     path('create_category/', views.create_category, name='create_category'),
     path('transaction_list/', views.transaction_list, name='transaction_list'),
     path('recurring_transactions/', views.recurring_transactions, name='recurring_transactions'),
+    path('recurring_transaction_detail/<int:pk>/', views.recurring_transaction_detail, name='recurring_transaction_detail'),
+    path('store_selected_month_year/', views.store_selected_month_year, name='store_selected_month_year'),
+    path('calculate_totals/', views.calculate_totals, name='calculate_totals'),
 ]

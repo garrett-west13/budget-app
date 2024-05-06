@@ -17,27 +17,30 @@ from django.urls import reverse
 
 
 @login_required
+def store_selected_month_year(request):
+    if request.method == 'POST':
+        # Retrieve the JSON data from the request body
+        data = json.loads(request.body)
+        selected_month = data.get('selectedMonth')
+        selected_year = data.get('selectedYear')
+
+        # Store the selected month and year in the Django session
+        request.session['selectedMonth'] = selected_month
+        request.session['selectedYear'] = selected_year
+
+
+        # Return a JSON response indicating success
+        return JsonResponse({'message': 'Selected month and year stored successfully'})
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+
+
+
+
 def index(request):
-    currentDate = datetime.now()
-    currentYear = currentDate.year
-    currentMonth = currentDate.month
 
-    storedMonth = request.session.get('selectedMonth')
-    storedYear = request.session.get('selectedYear')
-
-    if storedMonth and storedYear:
-        currentMonth = int(storedMonth)
-        currentYear = int(storedYear)
-
-    context = {
-        'currentYear': currentYear,
-        'currentMonth': currentMonth
-    }
-
-    return render(request, 'index.html', context)
-
-
-
+    return render(request, 'index.html')
 
 def register(request):
     if request.method == 'POST':
@@ -151,9 +154,6 @@ def add_transaction(request, year, month, day):
     return render(request, 'transactions.html', context)
 
 
-
-
-
 @login_required
 def create_category(request):
     if request.method == 'POST':
@@ -209,3 +209,66 @@ def recurring_transactions(request):
     }
 
     return render(request, 'recurring_transactions.html', context)
+
+@login_required
+def recurring_transaction_detail(request, pk):
+    transactions = Transaction.objects.filter(user=request.user, original_transaction_id=pk)
+
+    context = {
+        'transactions': transactions
+    }
+
+    return render(request, 'recurring_transaction_detail.html', context)
+
+
+
+
+@login_required
+def calculate_totals(request):
+    # Retrieve selected month and year from session
+    stored_year = request.session.get('selectedYear')
+    stored_month = request.session.get('selectedMonth')
+
+    if stored_month is not None and stored_year is not None:
+        current_month = int(stored_month + 1)
+        current_year = int(stored_year)
+    else:
+        # Set default values for current month and year
+        current_date = datetime.now()
+        current_year = current_date.year
+        current_month = current_date.month
+
+
+    # Calculate total expenses for the month
+    total_expenses = round(Transaction.objects.filter(
+        transaction_date__year=current_year,
+        transaction_date__month=current_month,
+        is_income=False
+    ).aggregate(Sum('amount'))['amount__sum'] or 0.0, 2)
+
+    # Calculate total income for the month
+    total_income = round(Transaction.objects.filter(
+        transaction_date__year=current_year,
+        transaction_date__month=current_month,
+        is_income=True
+    ).aggregate(Sum('amount'))['amount__sum'] or 0.0, 2)
+
+    # Calculate total balance for the month
+    total_balance = round(total_income - total_expenses, 2)
+
+    # Calculate total savings for the month (if applicable)
+    total_savings = round(Transaction.objects.filter(
+        transaction_date__year=current_year,
+        transaction_date__month=current_month,
+        is_income=False,
+        category__name='Savings'
+    ).aggregate(Sum('amount'))['amount__sum'] or 0.0, 2)
+
+    # Return JSON data containing the totals
+    data = {
+        'total_expenses': total_expenses,
+        'total_income': total_income,
+        'total_balance': total_balance,
+        'total_savings': total_savings
+    }
+    return JsonResponse(data)

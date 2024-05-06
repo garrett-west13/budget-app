@@ -1,0 +1,16 @@
+{% extends 'layout.html' %}
+
+{% block title %}Recurring Transaction Detail{% endblock %}
+
+{% block content %}
+<h1>Recurring Transaction Detail</h1>
+{% for transaction in transactions %}
+<p>Category: {{ transaction.category.name }}</p>
+<p>Amount: {{ transaction.amount }}</p>
+<p>Description: {{ transaction.description }}</p>
+<p>Frequency: {{ transaction.frequency }}</p>
+<p>Start Date: {{ transaction.start_date }}</p>
+<p>End Date: {{ transaction.end_date }}</p>
+<p>Original Transaction: {{ transaction.original_transaction }}</p>
+{% endfor %}
+{% endblock %}
