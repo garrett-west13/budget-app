@@ -10,10 +10,12 @@
 <div class="container body form">
     <h2>Add a transaction for {{ transaction_date|date:"F d, Y" }}</h2>
 
-    {% if message %}
-        <div class="alert alert-danger mt-3" role="alert">
-            {{ message }}
-        </div>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
     {% endif %}
 
     <form method="post" action="{% url 'add_transaction' year=year month=month day=day %}">

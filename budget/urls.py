@@ -14,4 +14,6 @@ urlpatterns = [
     path('recurring_transaction_detail/<int:pk>/', views.recurring_transaction_detail, name='recurring_transaction_detail'),
     path('store_selected_month_year/', views.store_selected_month_year, name='store_selected_month_year'),
     path('calculate_totals/', views.calculate_totals, name='calculate_totals'),
+    path('update_transaction/<int:pk>/', views.update_transaction, name='update_transaction'),
+    path('delete_transaction/<int:pk>/', views.delete_transaction, name='delete_transaction'),
 ]

@@ -1,5 +1,5 @@
 import json
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .forms import RegistrationForm, TransactionForm
 from django.contrib.auth import logout, authenticate, login
@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import AuthenticationForm
 from .calendar import Calendar
 from datetime import datetime
-from .models import Transaction, Category, Goal
+from .models import Transaction, Category
 from django.http import JsonResponse, Http404, HttpResponse
 from django.db.models import Sum, F
 from dateutil.relativedelta import relativedelta
@@ -96,27 +96,20 @@ def add_transaction(request, year, month, day):
             transaction = form.save(commit=False)
             transaction.user = request.user
 
-            # Validate and set frequency and start date for recurring transactions
             if transaction.recurring:
-                original_transaction = Transaction.objects.get(pk=transaction.pk)
-                transaction.original_transaction = original_transaction
                 end_date = form.cleaned_data.get('end_date')
                 frequency = form.cleaned_data.get('frequency')
                 if not end_date or not frequency:
                     messages.error(request, 'Please provide both end date and frequency for recurring transactions.')
                     return render(request, 'transactions.html', {'form': form})
 
-                # Set the transaction's frequency and start date
                 transaction.frequency = frequency
                 transaction.start_date = date
-
-                # Save the transaction
                 transaction.save()
 
                 messages.success(request, 'Recurring transaction added successfully.')
-                return redirect('recurring_transactions')  # Redirect to transaction list view or any other appropriate URL
+                return redirect('recurring_transactions')
             else:
-                # Process non-recurring transaction
                 transaction.end_date = None
                 transaction.save()
                 messages.success(request, 'Transaction added successfully.')
@@ -125,13 +118,10 @@ def add_transaction(request, year, month, day):
     else:
         form = TransactionForm(request.user, initial={'transaction_date': date})
 
-
-    # Retrieve transactions for the selected date
     transactions = Transaction.objects.filter(user=request.user, transaction_date=date)
     income_transactions = transactions.filter(is_income=True)
     expense_transactions = transactions.filter(is_income=False)
 
-    # Calculate total income, expenses, balance, and savings
     total_income = round(income_transactions.aggregate(total=Sum('amount'))['total'] or 0, 2)
     total_expense = round(expense_transactions.aggregate(total=Sum('amount'))['total'] or 0, 2)
     balance = round(total_income - total_expense, 2)
@@ -185,19 +175,6 @@ def calendar(request, year, month):
     calendar = Calendar()
     calendar_html = calendar.formatmonth(year, month)
     return HttpResponse(calendar_html)
-    
-@login_required
-def transaction_list(request):
-    # Retrieve all transactions for the logged-in user
-    transactions = Transaction.objects.filter(user=request.user)
-
-    # You may want to order the transactions by date or any other criteria
-    # transactions = transactions.order_by('-transaction_date')
-
-    context = {
-        'transactions': transactions,
-    }
-    return render(request, 'transaction_list.html', context)
 
 @login_required
 def recurring_transactions(request):
@@ -220,11 +197,9 @@ def recurring_transaction_detail(request, pk):
 
     return render(request, 'recurring_transaction_detail.html', context)
 
-
-
-
 @login_required
 def calculate_totals(request):
+
     # Retrieve selected month and year from session
     stored_year = request.session.get('selectedYear')
     stored_month = request.session.get('selectedMonth')
@@ -237,7 +212,6 @@ def calculate_totals(request):
         current_date = datetime.now()
         current_year = current_date.year
         current_month = current_date.month
-
 
     # Calculate total expenses for the month
     total_expenses = round(Transaction.objects.filter(
@@ -254,7 +228,7 @@ def calculate_totals(request):
     ).aggregate(Sum('amount'))['amount__sum'] or 0.0, 2)
 
     # Calculate total balance for the month
-    total_balance = round(total_income - total_expenses, 2)
+    total_balance = round(float(total_income) - float(total_expenses), 2)
 
     # Calculate total savings for the month (if applicable)
     total_savings = round(Transaction.objects.filter(
@@ -272,3 +246,49 @@ def calculate_totals(request):
         'total_savings': total_savings
     }
     return JsonResponse(data)
+
+@login_required
+def transaction_list(request):
+    # Retrieve all transactions for the logged-in user
+    transactions = Transaction.objects.filter(user=request.user, recurring=False, original_transaction__isnull=True).order_by('-transaction_date')
+
+    # Filter out the original instances of recurring transactions
+    original_transactions = Transaction.objects.filter(user=request.user, recurring=True, original_transaction__isnull=True).distinct().order_by('-transaction_date')
+
+    context = {
+        'transactions': transactions,
+        'recurring_transactions': original_transactions,
+    }
+    return render(request, 'transaction_list.html', context)
+
+
+
+@login_required
+def update_transaction(request, pk):
+    transaction = get_object_or_404(Transaction, id=pk, user=request.user)
+
+    if request.method == 'POST':
+        form = TransactionForm(request.user, request.POST, instance=transaction)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Transaction updated successfully.')
+            return redirect('transaction_list')
+    else:
+        form = TransactionForm(request.user, instance=transaction)
+
+    # Pass the 'transaction' object to the template context
+    return render(request, 'transaction_update.html', {'form': form, 'transaction': transaction})
+
+
+
+
+@login_required
+def delete_transaction(request, pk):
+    transaction = get_object_or_404(Transaction, id=pk)
+    
+    if request.method == 'POST':
+        transaction.delete()
+        messages.success(request, 'Transaction deleted successfully.')
+        return redirect('transaction_list')
+
+    return redirect('transaction_list')

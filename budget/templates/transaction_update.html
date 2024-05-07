@@ -1,0 +1,84 @@
+{% extends 'layout.html' %}
+
+{% load static %}
+
+{% block title %}Update Transaction{% endblock %}
+
+{% block content %}
+<!-- Transaction Update Form -->
+<a href="{% url 'transaction_list' %}" class="btn btn-secondary mt-3 ml-3 text-left">&larr; Back</a>
+<div class="container body form">
+    <h2>Update Transaction</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" action="{% url 'update_transaction' pk=transaction.id %}">
+
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="amount">Amount:</label>
+            <input type="number" step="0.01" min=".01" class="form-control" id="amount" name="amount" value="{{ transaction.amount }}" placeholder="$0.00" required>
+        </div>
+
+        <div class="form-group">
+            <label for="category">Category:</label>
+            <select class="form-control" id="category" name="category">
+                {% for category in form.category.field.queryset %}
+                    <option value="{{ category.id }}" {% if category.id == transaction.category.id %} selected {% endif %}>{{ category.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="new_category">Or add new category:</label>
+            <input type="text" class="form-control" id="new_category" name="new_category" placeholder="New Category Name">
+            <button class="btn btn-primary mb-2 mt-2" type="button" id="add-category">Add Category</button>
+        </div>
+        
+        <div class="form-group">
+            <label for="description">Description:</label>
+            <textarea class="form-control" id="description" name="description">{{ transaction.description }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.recurring.id_for_label }}">Recurring:</label>
+            {{ form.recurring }}
+        </div>
+        
+        <div class="form-group" id="frequencyField">
+            <label for="frequency">Frequency:</label>
+            <select class="form-control" id="frequency" name="frequency">
+                <option value="monthly">Monthly</option>
+                <option value="weekly">Weekly</option>
+                <option value="biweekly">Bi-weekly</option>
+                <option value="yearly">Yearly</option>
+            </select>
+        </div>
+
+        <div class="form-group" id="endDateField">
+            <label for="end_date">End Date:</label>
+            <input type="date" class="form-control" id="end_date" name="end_date" value="{{ transaction.end_date|date:'Y-m-d' }}">
+            <small class="form-text text-muted">Default is one year from start date</small>
+        </div>
+
+        <div class="form-group">
+            <label>Income or Expense:</label>
+            {% for radio in form.is_income %}
+                {{ radio }}
+            {% endfor %}
+        </div>
+
+        <input type="hidden" name="transaction_date" value="{{ transaction.transaction_date }}">
+
+        <button class="btn btn-primary" type="submit">Update Transaction</button>
+    </form>
+</div>
+<script src="{% static 'transactions.js' %}"></script>
+{% endblock %}
+
+

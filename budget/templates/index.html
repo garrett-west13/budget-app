@@ -17,6 +17,12 @@
     </div>
     {% else %}
     <div class="help-block text-right mr-4 mt-2 text-muted">A red <span class="expense-dot">•</span> indicates an expense. A green <span class="income-dot">•</span> indicates an income.</div>
+    <div id="loading-spinner" class="text-center">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+        <p class="text-muted">Loading...</p>
+    </div>
     <div id="calendar-container" class="calendar-container">
         <div class="d-flex justify-content-between mb-2">
             <button type="button" class="btn btn-primary ml-2 mb-2" id="prev-month">Previous Month</button>

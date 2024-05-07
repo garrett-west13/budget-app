@@ -46,6 +46,7 @@
 .text-danger {
     display: block;
     word-wrap: break-word;
+    color: red;
 
 }
 
@@ -302,4 +303,25 @@ table td.current-day:hover {
 
 .transaction-table td {
     font-size: 16px;   
+}
+
+/* Add margin to the top and bottom of the container */
+.container.body {
+    margin-top: 50px;
+    margin-bottom: 50px;
+}
+
+/* Add padding to the card headers */
+.card-header {
+    padding: 10px 15px;
+}
+
+/* Adjust card spacing */
+.card {
+    margin-bottom: 20px;
+}
+
+/* Style card titles */
+.card-title {
+    margin-bottom: 0;
 }
