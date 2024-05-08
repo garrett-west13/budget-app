@@ -9,7 +9,6 @@
     margin-bottom: 50px;
 }
 
-
 .registration-form {
     max-width: 400px;
     padding: 20px;
@@ -18,7 +17,6 @@
     justify-content: center;
     text-align: center;
 }
-
 
 .form-group {
     margin-bottom: 30px;
@@ -50,12 +48,11 @@
 
 }
 
-
-
 /* Define styling for the calendar container */
 .calendar-container {
     max-width: 1000px; 
     margin: 50px auto; 
+    margin-top: 10px;
     padding: 20px;
     border-radius: 10px; 
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
@@ -90,7 +87,6 @@ table th {
     font-size: 28px; 
 }
 
-
 /* Define hover effect on table cells */
 table td.day:hover {
     background-color: #f9f9f9;
@@ -122,8 +118,6 @@ table td.current-day:hover {
     color: #333333;
     text-decoration: none !important; 
 }
-
-
 
 .monthly-overview-container {
     display: flex;
@@ -172,10 +166,9 @@ table td.current-day:hover {
     color: red;
 }
 
-
-
-/* Add income and expense dots */
-.day.income-dot.expense-dot .cell-content::after {
+/* Add income and expense dots for the day or current day */
+.day.income-dot.expense-dot .cell-content::after,
+.day.current-day.income-dot.expense-dot .cell-content::after {
     content: "•";  /* Income dot */
     color: green;
     position: relative;
@@ -184,8 +177,9 @@ table td.current-day:hover {
     transform: translateX(-50%);
 }
 
-/* Show the income dot */
-.day.income-dot .cell-content::after {
+/* Show the income dot for the day or current day */
+.day.income-dot .cell-content::after,
+.day.current-day.income-dot .cell-content::after {
     content: "•";  /* Income dot */
     color: green;
     position: relative;
@@ -194,8 +188,9 @@ table td.current-day:hover {
     transform: translateX(-50%);
 }
 
-/* Show the expense dot */
-.day.expense-dot .cell-content::before {
+/* Show the expense dot for the day or current day */
+.day.expense-dot .cell-content::before,
+.day.current-day.expense-dot .cell-content::before {
     content: "•";  /* Expense dot */
     color: red;
     position: relative;
@@ -203,10 +198,6 @@ table td.current-day:hover {
     left: 10px; 
     transform: translateX(-50%);
 }
-
-
-
-
 
 .help-block {
     font-size: 14px;

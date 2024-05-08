@@ -1,0 +1,21 @@
+{% extends 'layout.html' %}
+
+{% block title %}Category Detail{% endblock %}
+
+{% block content %}
+<!-- Category Detail -->
+<h1 class="text-center mb-4">{{ category.name }}</h1>
+<a href="{% url 'category_list' %}" class="btn btn-secondary mt-3 ml-3 text-left">&larr; Back</a>
+
+{% if transactions %}
+<ul class="list-group">
+    {% for transaction in transactions %}
+    <li class="list-group-item">
+        <a href="{% url 'transaction_update' pk=transaction.id %}" class="text-decoration-none">{{ transaction.description }}</a>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>No transactions found</p>
+{% endif %}
+{% endblock %}

@@ -17,24 +17,33 @@
     </div>
     {% else %}
     <div class="help-block text-right mr-4 mt-2 text-muted">A red <span class="expense-dot">•</span> indicates an expense. A green <span class="income-dot">•</span> indicates an income.</div>
-    <div id="loading-spinner" class="text-center">
-        <div class="spinner-border text-primary" role="status">
-            <span class="sr-only">Loading...</span>
-        </div>
-        <p class="text-muted">Loading...</p>
+
+    <div class="d-flex form-group">
+        <input type="month" id="date-picker" class="form-control" style="max-width: 180px;">
     </div>
+
     <div id="calendar-container" class="calendar-container">
         <div class="d-flex justify-content-between mb-2">
             <button type="button" class="btn btn-primary ml-2 mb-2" id="prev-month">Previous Month</button>
             <button type="button" class="btn btn-primary ml-2 mb-2" id="current-month">Current Month</button>
             <button type="button" class="btn btn-primary ml-2 mb-2" id="next-month">Next Month</button>
         </div>
+
         <p class="text-muted text-center">
             to add a new transaction, click on any day you want to add it to.
         </p>
-        <div id="calendar">
+
+        <div id="loading-spinner" class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+            <p class="text-muted">Loading...</p>
         </div>
+
+        <div id="calendar"></div>
+
     </div>
+
     <div class="monthly-overview-container">
         <div class="expenses">
             <h2>Total Expenses</h2>
@@ -53,7 +62,7 @@
             <p id="total-savings">Loading...</p>
         </div>        
     </div>      
-    </div>    
+</div>    
     <script src="{% static 'script.js' %}"></script> 
     {% endif %}
 {% endblock %}

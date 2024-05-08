@@ -15,6 +15,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fetch and load the initial calendar HTML
     loadCalendarContent(currentYear, currentMonth);
 
+    // Set the value of the date picker input to the current loaded month
+    document.getElementById('date-picker').value = `${currentYear}-${(currentMonth + 1).toString().padStart(2, '0')}`;
+
     // Event listener for navigating to the previous month
     document.getElementById('prev-month').addEventListener('click', function() {
         currentMonth--;
@@ -44,6 +47,17 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Load the calendar content for the current month
         loadCalendarContent(currentYear, currentMonth);
+    });
+
+    // Event listener for date picker change
+    document.getElementById('date-picker').addEventListener('change', function() {
+        // Get the selected year and month from the value of the date picker
+        const selectedDate = new Date(this.value);
+        const selectedYear = selectedDate.getFullYear();
+        const selectedMonth = selectedDate.getMonth();
+
+        // Load the calendar content for the selected year and month
+        loadCalendarContent(selectedYear, selectedMonth);
     });
 
     // Function to store the selected month and year in local storage
@@ -111,34 +125,38 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-// Load the calendar content
-function loadCalendarContent(year, month) {
-    // Hide the calendar while loading
-    document.getElementById('calendar').style.display = 'none';
-    // Show the loading spinner
-    showLoadingSpinner();
+    // Load the calendar content
+    function loadCalendarContent(year, month) {
+        // Hide the calendar while loading
+        document.getElementById('calendar').style.display = 'none';
+        // Show the loading spinner
+        showLoadingSpinner();
 
-    storeSelectedMonthAndYear(year, month);
-    fetch(`/calendar/${year}/${month + 1}`)
-        .then(response => {
-            return response.text();
-        })
-        .then(data => {
-            // Show the calendar after the content is loaded
-            document.getElementById('calendar').innerHTML = data;
-            document.getElementById('calendar').style.display = 'block';
-            updateTotals();
+        document.getElementById('total-expenses').textContent = 'Loading...';
+        document.getElementById('total-income').textContent = 'Loading...';
+        document.getElementById('total-savings').textContent = 'Loading...';
+        document.getElementById('total-balance').textContent = 'Loading...';
 
-            // Hide the loading spinner after the calendar content is loaded
-            hideLoadingSpinner();
-        })
-        .catch(error => {
-            console.error('Error fetching calendar content:', error);
-            // Hide the loading spinner in case of an error
-            hideLoadingSpinner();
-        });
-}
+        storeSelectedMonthAndYear(year, month);
+        fetch(`/calendar/${year}/${month + 1}`)
+            .then(response => {
+                return response.text();
+            })
+            .then(data => {
+                // Show the calendar after the content is loaded
+                document.getElementById('calendar').innerHTML = data;
+                document.getElementById('calendar').style.display = 'block';
+                updateTotals();
 
+                // Hide the loading spinner after the calendar content is loaded
+                hideLoadingSpinner();
+            })
+            .catch(error => {
+                console.error('Error fetching calendar content:', error);
+                // Hide the loading spinner in case of an error
+                hideLoadingSpinner();
+            });
+    }
 
     // Function to fetch totals from the server and update UI
     function updateTotals() {

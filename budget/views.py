@@ -10,11 +10,8 @@ from .calendar import Calendar
 from datetime import datetime
 from .models import Transaction, Category
 from django.http import JsonResponse, Http404, HttpResponse
-from django.db.models import Sum, F
-from dateutil.relativedelta import relativedelta
+from django.db.models import Sum
 from datetime import timedelta
-from django.urls import reverse
-from django.template.loader import render_to_string
 
 
 @login_required
@@ -109,7 +106,7 @@ def add_transaction(request, year, month, day):
                 transaction.save()
 
                 messages.success(request, 'Recurring transaction added successfully.')
-                return redirect('recurring_transactions')
+                return redirect('add_transactions', year=year, month=month, day=day)
             else:
                 transaction.end_date = None
                 transaction.save()
@@ -175,19 +172,8 @@ def calendar(request, year, month):
     return HttpResponse(calendar_html)
 
 @login_required
-def recurring_transactions(request):
-    # Query the database to retrieve distinct original transactions
-    original_transactions = Transaction.objects.filter(user=request.user, recurring=True, original_transaction__isnull=True).distinct()
-
-    context = {
-        'original_transactions': original_transactions
-    }
-
-    return render(request, 'recurring_transactions.html', context)
-
-@login_required
 def recurring_transaction_detail(request, pk):
-    transactions = Transaction.objects.filter(user=request.user, original_transaction_id=pk).order_by('-transaction_date')
+    transactions = Transaction.objects.filter(user=request.user, original_transaction_id=pk)
     original_transaction = Transaction.objects.get(id=pk)
 
     context = {
@@ -250,28 +236,33 @@ def calculate_totals(request):
 
 @login_required
 def transaction_list(request, year=None, month=None):
-    
+    try:
+        year = int(year) if year is not None else None
+        month = int(month) if month is not None else None
+    except ValueError:
+        raise Http404("Invalid date")
+
     if year is not None and month is not None:
         try:
-            date = datetime(year=int(year), month=int(month), day=1)
+            date = datetime(year=year, month=month, day=1)
         except ValueError:
             raise Http404("Invalid date")
-        transactions = Transaction.objects.filter(user=request.user, recurring=False, original_transaction__isnull=True, transaction_date__year=year, transaction_date__month=month).order_by('-transaction_date')
     else:
         # Default to current month and year if year and month are not provided
         date = datetime.now()
         year = date.year
         month = date.month
-        transactions = Transaction.objects.filter(user=request.user, recurring=False, original_transaction__isnull=True, transaction_date__year=year, transaction_date__month=month).order_by('-transaction_date')
 
-    original_transactions = Transaction.objects.filter(user=request.user, recurring=True, original_transaction__isnull=True).distinct().order_by('-transaction_date')
+    transactions = Transaction.objects.filter(user=request.user, recurring=False, original_transaction__isnull=True, transaction_date__year=year, transaction_date__month=month).order_by('-transaction_date')
+
+    recurring_transactions = Transaction.objects.filter(user=request.user, recurring=True, transaction_date__year=year, transaction_date__month=month).order_by('-transaction_date')
 
     context = {
         'transactions': transactions,
-        'recurring_transactions': original_transactions,
+        'recurring_transactions': recurring_transactions,
+        'date': date,
     }
     return render(request, 'transaction_list.html', context)
-
 
 @login_required
 def update_transaction(request, pk):
@@ -293,11 +284,24 @@ def update_transaction(request, pk):
 
 @login_required
 def delete_transaction(request, pk):
-    transaction = get_object_or_404(Transaction, id=pk)
+    # Ensure that the user matches the user who created the transaction
+    transaction = get_object_or_404(Transaction, id=pk, user=request.user)
     
     if request.method == 'POST':
         transaction.delete()
         messages.success(request, 'Transaction deleted successfully.')
-        return redirect('transaction_list')
+        # Redirect to the 'transaction_list' view with appropriate year and month arguments
+        return redirect('transaction_list', year=transaction.transaction_date.year, month=transaction.transaction_date.month)
 
-    return redirect('transaction_list')
+    return redirect('transaction_list', year=transaction.transaction_date.year, month=transaction.transaction_date.month)
+
+
+@login_required
+def category_list(request):
+    categories = Category.objects.filter(user=request.user).order_by('name')
+    return render(request, 'category_list.html', {'categories': categories})
+
+@login_required
+def category_detail(request, pk):
+    category = get_object_or_404(Category, id=pk, user=request.user)
+    return render(request, 'category_detail.html', {'category': category})

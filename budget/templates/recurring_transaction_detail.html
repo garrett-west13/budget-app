@@ -3,15 +3,29 @@
 {% block title %}Recurring Transaction Detail{% endblock %}
 
 {% block content %}
-<h1>Recurring Transaction Detail</h1>
-Original Transaction: {{ original_transaction }}
-{% for transaction in transactions %}
-<p>Category: {{ transaction.category.name }}</p>
-<p>Amount: {{ transaction.amount }}</p>
-<p>Description: {{ transaction.description }}</p>
-<p>Frequency: {{ transaction.frequency }}</p>
-<p>Start Date: {{ transaction.start_date }}</p>
-<p>End Date: {{ transaction.end_date }}</p>
-<p>Original Transaction: {{ transaction.original_transaction }}</p>
-{% endfor %}
+<div class="container">
+    <h1 class="my-4">Recurring Transaction Detail</h1>
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Original Transaction:</h5>
+            <p class="card-text"><strong>Description:</strong> {{ original_transaction.description }}</p>
+            <p class="card-text"><strong>Amount:</strong> {{ original_transaction.amount }}</p>
+            <p class="card-text"><strong>Category:</strong> {{ original_transaction.category.name }}</p>
+            <p class="card-text"><strong>Start Date:</strong> {{ original_transaction.start_date }}</p>
+            <p class="card-text"><strong>End Date:</strong> {{ original_transaction.end_date }}</p>
+            <p class="card-text"><strong>Frequency:</strong> {{ original_transaction.frequency }}</p>
+        </div>
+    </div>
+
+    {% for transaction in transactions %}
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Transaction Details</h5>
+            <p class="card-text"><strong>Amount:</strong> {{ transaction.amount }}</p>
+            <p class="card-text"><strong>Transaction Date:</strong> {{ transaction.transaction_date }}</p>
+            <p class="card-text"><strong>Original Transaction:</strong> {{ transaction.original_transaction }}</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
 {% endblock %}

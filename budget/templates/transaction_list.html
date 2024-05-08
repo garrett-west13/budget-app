@@ -15,6 +15,11 @@
         {% endfor %}
     {% endif %}
 
+    <div class="mb-4 d-flex form-group">
+        <input type="month" id="date-picker" class="form-control" style="max-width: 180px;" value="{{ date|date:'Y-m' }}">
+    </div>
+    
+
     <div class="d-flex justify-content-center mb-4">
         <button id="prev-month" class="btn btn-primary">Previous Month</button>
         <button id="current-month" class="btn btn-primary ml-2">Current Month</button>
@@ -63,7 +68,7 @@
                                 <h5 class="card-title">{{ recurring_transaction.description }}</h5>
                                 <p class="card-text">Amount: ${{ recurring_transaction.amount }}</p>
                                 <p class="card-text">Frequency: {{ recurring_transaction.frequency }}</p>
-                                <p class="card-text">Start Date: {{ recurring_transaction.transaction_date }}</p>
+                                <p class="card-text">Transaction Date: {{ recurring_transaction.transaction_date }}</p>
                                 <p class="card-text">End Date: {{ recurring_transaction.end_date }}</p>
                                 <div class="btn-group">
                                     <a href="{% url 'recurring_transaction_detail' recurring_transaction.id %}" class="btn btn-primary btn-sm mr-2">View Details</a>
@@ -83,44 +88,56 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Event listener for navigating to the previous month
-    document.getElementById('prev-month').addEventListener('click', function() {
-        const currentDate = new Date();
-        let currentYear = currentDate.getFullYear();
-        let currentMonth = currentDate.getMonth() + 1; // Adjust for one-based indexing
-        // Adjust the month and year accordingly
-        if (currentMonth === 1) {
-            currentMonth = 12; // December of previous year
-            currentYear -= 1;
-        } else {
-            currentMonth -= 1;
-        }
-        window.location.href = `/transaction_list/${currentYear}/${currentMonth}`;
-    });
+    document.addEventListener('DOMContentLoaded', function() {
+        // Retrieve the current year and month from local storage
+        let currentYear = parseInt(localStorage.getItem('currentYear')) || new Date().getFullYear();
+        let currentMonth = parseInt(localStorage.getItem('currentMonth')) || (new Date().getMonth() + 1);
 
-    // Event listener for navigating to the next month
-    document.getElementById('next-month').addEventListener('click', function() {
-        const currentDate = new Date();
-        let currentYear = currentDate.getFullYear();
-        let currentMonth = currentDate.getMonth() + 1; // Adjust for one-based indexing
-        // Adjust the month and year accordingly
-        if (currentMonth === 12) {
-            currentMonth = 1; // January of next year
-            currentYear += 1;
-        } else {
-            currentMonth += 1;
+        // Function to update the current year and month in local storage
+        function updateCurrentDate(year, month) {
+            localStorage.setItem('currentYear', year);
+            localStorage.setItem('currentMonth', month);
         }
-        window.location.href = `/transaction_list/${currentYear}/${currentMonth}`;
-    });
 
-    // Event listener for going back to the current month
-    document.getElementById('current-month').addEventListener('click', function() {
-        const currentDate = new Date();
-        const currentYear = currentDate.getFullYear();
-        const currentMonth = currentDate.getMonth() + 1; // Adjust for one-based indexing
-        window.location.href = `/transaction_list/${currentYear}/${currentMonth}`;
+        // Event listener for navigating to the previous month
+        document.getElementById('prev-month').addEventListener('click', function() {
+            if (currentMonth === 1) {
+                currentMonth = 12;
+                currentYear -= 1;
+            } else {
+                currentMonth -= 1;
+            }
+            updateCurrentDate(currentYear, currentMonth);
+            window.location.href = `/transaction_list/${currentYear}/${currentMonth}`;
+        });
+
+        // Event listener for navigating to the next month
+        document.getElementById('next-month').addEventListener('click', function() {
+            if (currentMonth === 12) {
+                currentMonth = 1;
+                currentYear += 1;
+            } else {
+                currentMonth += 1;
+            }
+            updateCurrentDate(currentYear, currentMonth);
+            window.location.href = `/transaction_list/${currentYear}/${currentMonth}`;
+        });
+
+        // Event listener for going back to the current month
+        document.getElementById('current-month').addEventListener('click', function() {
+            currentYear = new Date().getFullYear();
+            currentMonth = new Date().getMonth() + 1;
+            updateCurrentDate(currentYear, currentMonth);
+            window.location.href = `/transaction_list/${currentYear}/${currentMonth}`;
+        });
+
+        // Event listener for date picker change
+        document.getElementById('date-picker').addEventListener('change', function() {
+            const selectedDate = new Date(this.value);
+            const selectedYear = selectedDate.getFullYear();
+            const selectedMonth = selectedDate.getMonth() + 1;
+            window.location.href = `/transaction_list/${selectedYear}/${selectedMonth}`;
+        });
     });
-});
 </script>
 {% endblock %}
