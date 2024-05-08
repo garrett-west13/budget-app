@@ -6,7 +6,7 @@
 
 {% block content %}
 <!-- Transaction Update Form -->
-<a href="{% url 'transaction_list' %}" class="btn btn-secondary mt-3 ml-3 text-left">&larr; Back</a>
+<a href="{% url 'transaction_list' year=transaction.transaction_date.year month=transaction.transaction_date.month %}" class="btn btn-secondary mt-3 ml-3 text-left">&larr; Back</a>
 <div class="container body form">
     <h2>Update Transaction</h2>
 

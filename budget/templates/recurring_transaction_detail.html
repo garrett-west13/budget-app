@@ -4,6 +4,7 @@
 
 {% block content %}
 <h1>Recurring Transaction Detail</h1>
+Original Transaction: {{ original_transaction }}
 {% for transaction in transactions %}
 <p>Category: {{ transaction.category.name }}</p>
 <p>Amount: {{ transaction.amount }}</p>

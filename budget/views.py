@@ -14,6 +14,7 @@ from django.db.models import Sum, F
 from dateutil.relativedelta import relativedelta
 from datetime import timedelta
 from django.urls import reverse
+from django.template.loader import render_to_string
 
 
 @login_required
@@ -139,10 +140,8 @@ def add_transaction(request, year, month, day):
         'year': year,
         'month': month,
         'day': day,
-        'messages': messages
     }
     return render(request, 'transactions.html', context)
-
 
 @login_required
 def create_category(request):
@@ -168,8 +167,7 @@ def create_category(request):
 
     else:
         # Return a method not allowed response if the request method is not POST
-        return JsonResponse({'error': 'Method not allowed'}, status=405)
-        
+        return JsonResponse({'error': 'Method not allowed'}, status=405)  
 
 def calendar(request, year, month):
     calendar = Calendar()
@@ -189,10 +187,13 @@ def recurring_transactions(request):
 
 @login_required
 def recurring_transaction_detail(request, pk):
-    transactions = Transaction.objects.filter(user=request.user, original_transaction_id=pk)
+    transactions = Transaction.objects.filter(user=request.user, original_transaction_id=pk).order_by('-transaction_date')
+    original_transaction = Transaction.objects.get(id=pk)
 
     context = {
-        'transactions': transactions
+        'transactions': transactions,
+        'original_transaction': original_transaction
+
     }
 
     return render(request, 'recurring_transaction_detail.html', context)
@@ -248,11 +249,21 @@ def calculate_totals(request):
     return JsonResponse(data)
 
 @login_required
-def transaction_list(request):
-    # Retrieve all transactions for the logged-in user
-    transactions = Transaction.objects.filter(user=request.user, recurring=False, original_transaction__isnull=True).order_by('-transaction_date')
+def transaction_list(request, year=None, month=None):
+    
+    if year is not None and month is not None:
+        try:
+            date = datetime(year=int(year), month=int(month), day=1)
+        except ValueError:
+            raise Http404("Invalid date")
+        transactions = Transaction.objects.filter(user=request.user, recurring=False, original_transaction__isnull=True, transaction_date__year=year, transaction_date__month=month).order_by('-transaction_date')
+    else:
+        # Default to current month and year if year and month are not provided
+        date = datetime.now()
+        year = date.year
+        month = date.month
+        transactions = Transaction.objects.filter(user=request.user, recurring=False, original_transaction__isnull=True, transaction_date__year=year, transaction_date__month=month).order_by('-transaction_date')
 
-    # Filter out the original instances of recurring transactions
     original_transactions = Transaction.objects.filter(user=request.user, recurring=True, original_transaction__isnull=True).distinct().order_by('-transaction_date')
 
     context = {
@@ -262,9 +273,9 @@ def transaction_list(request):
     return render(request, 'transaction_list.html', context)
 
 
-
 @login_required
 def update_transaction(request, pk):
+
     transaction = get_object_or_404(Transaction, id=pk, user=request.user)
 
     if request.method == 'POST':
@@ -272,15 +283,13 @@ def update_transaction(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, 'Transaction updated successfully.')
-            return redirect('transaction_list')
+            return redirect('transaction_list', year=transaction.transaction_date.year, month=transaction.transaction_date.month)
+
     else:
         form = TransactionForm(request.user, instance=transaction)
 
     # Pass the 'transaction' object to the template context
     return render(request, 'transaction_update.html', {'form': form, 'transaction': transaction})
-
-
-
 
 @login_required
 def delete_transaction(request, pk):
