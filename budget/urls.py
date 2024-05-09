@@ -17,4 +17,6 @@ urlpatterns = [
     path('delete_transaction/<int:pk>/', views.delete_transaction, name='delete_transaction'),
     path('category_list/', views.category_list, name='category_list'),
     path('category_detail/<int:pk>/', views.category_detail, name='category_detail'),
+    path('delete_category/<int:pk>/', views.delete_category, name='delete_category'),
+    path('yearly_summary/<int:year>/', views.yearly_summary, name='yearly_summary'),
 ]

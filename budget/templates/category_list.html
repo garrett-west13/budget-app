@@ -1,16 +1,34 @@
 {% extends 'layout.html' %}
 
+{% load static %}
+
 {% block title %}Category List{% endblock %}
 
 {% block content %}
 <div class="container">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
     <div class="row">
         <div class="col-md-8 offset-md-2">
             <h1 class="text-center mb-4">Category List</h1>
             <ul class="list-group">
                 {% for category in categories %}
                 <li class="list-group-item">
-                    <a href="{% url 'category_detail' category.id %}" class="text-decoration-none">{{ category.name }}</a>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="{% url 'category_detail' category.id %}" class="text-decoration-none">{{ category.name }}</a>
+                        <span class="badge badge-primary badge-pill">{{ category.transaction_count }}</span>
+                        {% if category.transaction_count == 0 %}
+                            <form action="{% url 'delete_category' category.id %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        {% endif %}
+                    </div>
                 </li>
                 {% endfor %}
             </ul>

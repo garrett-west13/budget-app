@@ -10,7 +10,7 @@ from .calendar import Calendar
 from datetime import datetime
 from .models import Transaction, Category
 from django.http import JsonResponse, Http404, HttpResponse
-from django.db.models import Sum
+from django.db.models import Sum, Count, Q 
 from datetime import timedelta
 
 
@@ -106,7 +106,7 @@ def add_transaction(request, year, month, day):
                 transaction.save()
 
                 messages.success(request, 'Recurring transaction added successfully.')
-                return redirect('add_transactions', year=year, month=month, day=day)
+                return redirect('add_transaction', year=year, month=month, day=day)
             else:
                 transaction.end_date = None
                 transaction.save()
@@ -298,10 +298,82 @@ def delete_transaction(request, pk):
 
 @login_required
 def category_list(request):
-    categories = Category.objects.filter(user=request.user).order_by('name')
+    categories = Category.objects.filter(user=request.user).annotate(transaction_count=Count('transaction')).order_by('name')
     return render(request, 'category_list.html', {'categories': categories})
 
 @login_required
 def category_detail(request, pk):
     category = get_object_or_404(Category, id=pk, user=request.user)
-    return render(request, 'category_detail.html', {'category': category})
+    transactions = Transaction.objects.filter(user=request.user, category=category)
+    
+    context = {
+        'category': category,
+        'transactions': transactions
+    }
+    
+    return render(request, 'category_detail.html', context)
+
+@login_required
+def delete_category(request, pk):
+
+    category = get_object_or_404(Category, id=pk, user=request.user)
+    category.delete()
+    messages.success(request, 'Category deleted successfully.')
+    return redirect('category_list')
+
+@login_required
+def yearly_summary(request, year=None):
+    if year is None:
+        year = datetime.now().year
+
+    # Retrieve the total income, total expenses, and balance for the selected year
+    transactions = Transaction.objects.filter(
+        user=request.user,
+        transaction_date__year=year
+    )
+
+    # Calculate total income and expenses
+    total_income = round(transactions.filter(is_income=True).aggregate(total=Sum('amount'))['total'] or 0, 2)
+    total_expenses = round(transactions.filter(is_income=False).aggregate(total=Sum('amount'))['total'] or 0, 2)
+
+    # Calculate balance
+    balance = round(total_income - total_expenses, 2)
+
+    # Calculate total savings
+    total_savings = round(transactions.filter(category__name='Savings', is_income=False).aggregate(total=Sum('amount'))['total'] or 0, 2)
+
+    # Calculate monthly summaries
+    monthly_summaries = {}
+    for month in range(1, 13):
+        month_name = datetime.strptime(str(month), "%m").strftime("%B")
+        month_transactions = transactions.filter(transaction_date__month=month)
+
+        # Calculate total income and expenses for the month
+        month_total_income = round(month_transactions.filter(is_income=True).aggregate(total=Sum('amount'))['total'] or 0, 2)
+        month_total_expenses = round(month_transactions.filter(is_income=False).aggregate(total=Sum('amount'))['total'] or 0, 2)
+
+        # Calculate balance for the month
+        month_balance = round(month_total_income - month_total_expenses, 2)
+
+        # Calculate monthly savings
+        month_savings = round(month_transactions.filter(category__name='Savings', is_income=False).aggregate(total=Sum('amount'))['total'] or 0, 2)
+
+        # Store monthly summary in dictionary
+        monthly_summaries[month_name] = {
+            'total_income': month_total_income,
+            'total_expenses': month_total_expenses,
+            'balance': month_balance,
+            'total_savings': month_savings,
+        }
+
+    yearly_summary_data = {
+        'total_income': total_income,
+        'total_expenses': total_expenses,
+        'balance': balance,
+        'total_savings': total_savings,
+        'monthly_summaries': monthly_summaries,
+        'selected_year': year
+    }
+
+    return render(request, 'yearly_summary.html', {'yearly_summary': yearly_summary_data})
+

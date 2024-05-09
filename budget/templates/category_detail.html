@@ -1,21 +1,47 @@
 {% extends 'layout.html' %}
 
+{% load static %}
+
 {% block title %}Category Detail{% endblock %}
 
 {% block content %}
-<!-- Category Detail -->
-<h1 class="text-center mb-4">{{ category.name }}</h1>
-<a href="{% url 'category_list' %}" class="btn btn-secondary mt-3 ml-3 text-left">&larr; Back</a>
+<div class="container">
+    <!-- Category Detail -->
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h1 class="text-center mt-4">{{ category.name }}</h1>
+            <a href="{% url 'category_list' %}" class="btn btn-secondary mt-3 mb-4">&larr; Back</a>
+        </div>
+    </div>
 
-{% if transactions %}
-<ul class="list-group">
-    {% for transaction in transactions %}
-    <li class="list-group-item">
-        <a href="{% url 'transaction_update' pk=transaction.id %}" class="text-decoration-none">{{ transaction.description }}</a>
-    </li>
-    {% endfor %}
-</ul>
-{% else %}
-<p>No transactions found</p>
-{% endif %}
+    <div class="row justify-content-center">
+        {% for transaction in transactions %}
+        <div class="col-md-4 mb-4">
+            <div class="card border-primary">
+                <div class="card-body">
+                    <h5 class="card-title">{{ transaction.description }}</h5>
+                    <p class="card-text"><strong>Category:</strong> {{ transaction.category }}</p>
+                    <p class="card-text"><strong>Amount:</strong> ${{ transaction.amount }}</p>
+                    <p class="card-text"><strong>Date:</strong> {{ transaction.transaction_date|date:"F d, Y" }}</p>
+                    {% if transaction.recurring %}
+                    <p class="card-text"><strong>Recurring:</strong> Yes</p>
+                    <p class="card-text"><strong>Frequency:</strong> {{ transaction.frequency }}</p>
+                    <p class="card-text"><strong>Start Date:</strong> {{ transaction.start_date|date:"F d, Y" }}</p>
+                    <p class="card-text"><strong>End Date:</strong> {{ transaction.end_date|date:"F d, Y" }}</p>
+                    {% else %}
+                    <p class="card-text"><strong>Recurring:</strong> No</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% if not transactions %}
+        <div class="col-md-8">
+            <div class="alert alert-info mt-3" role="alert">
+                No transactions found.
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}

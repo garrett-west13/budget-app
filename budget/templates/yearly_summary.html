@@ -1,0 +1,93 @@
+{% extends 'layout.html' %}
+
+{% load static %}
+
+{% block title %}Yearly Summary{% endblock %}
+
+{% block content %}
+
+<div class="container body">
+    <h1 class="text-center mb-4">Yearly Summary</h1>
+
+    <div class="d-flex justify-content-center mb-4">
+        <button id="prev-year" class="btn btn-primary">Previous Year</button>
+        <button id="current-year" class="btn btn-primary ml-2">Current Year</button>
+        <button id="next-year" class="btn btn-primary ml-2">Next Year</button>
+    </div>
+
+    {% if yearly_summary %}
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title">Financial Summary for {{ yearly_summary.selected_year }}</h2>
+                <ul class="list-group">
+                    <li class="list-group-item">Total Income: <span class="income">${{ yearly_summary.total_income }}</span></li>
+                    <li class="list-group-item">Total Expenses: <span class="expenses">${{ yearly_summary.total_expenses }}</span></li>
+                    <li class="list-group-item">Balance: <span class="{% if yearly_summary.balance < 0 %}text-danger{% elif yearly_summary.balance > 0 %}text-success{% endif %}">${{ yearly_summary.balance }}</span></li>
+                    <li class="list-group-item">Total Savings: <span class="savings">${{ yearly_summary.total_savings }}</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-body">
+                <h2 class="card-title">Monthly Summaries</h2>
+                <div class="row">
+                    {% for month, summary in yearly_summary.monthly_summaries.items %}
+                        <div class="col-md-4">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ month }}</h5>
+                                    <p class="card-text">Total Income: <span class="income">${{ summary.total_income }}</span></p>
+                                    <p class="card-text">Total Expenses: <span class="expenses">${{ summary.total_expenses }}</span></p>
+                                    <p class="card-text">Balance: <span class="{% if summary.balance < 0 %}text-danger{% elif summary.balance > 0 %}text-success{% endif %}">${{ summary.balance }}</span></p>
+                                    <p class="card-text">Total Savings: <span class="savings">${{ summary.total_savings }}</span></p>
+                                </div>
+                            </div>
+                        </div>
+                        {% if forloop.counter|divisibleby:3 and not forloop.last %}
+                            </div><div class="row">
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-info mt-4" role="alert">
+            No financial data available for the selected year.
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Retrieve the current year from local storage
+        let currentYear = parseInt(localStorage.getItem('currentYear')) || new Date().getFullYear();
+
+        // Function to update the current year in local storage
+        function updateCurrentYear(year) {
+            localStorage.setItem('currentYear', year);
+        }
+
+        // Event listener for navigating to the previous year
+        document.getElementById('prev-year').addEventListener('click', function() {
+            currentYear -= 1;
+            updateCurrentYear(currentYear);
+            window.location.href = `/yearly_summary/${currentYear}/`;
+        });
+
+        // Event listener for navigating to the next year
+        document.getElementById('next-year').addEventListener('click', function() {
+            currentYear += 1;
+            updateCurrentYear(currentYear);
+            window.location.href = `/yearly_summary/${currentYear}/`;
+        });
+
+        // Event listener for going back to the current year
+        document.getElementById('current-year').addEventListener('click', function() {
+            currentYear = new Date().getFullYear();
+            updateCurrentYear(currentYear);
+            window.location.href = `/yearly_summary/${currentYear}/`;
+        });
+    });
+</script>
+{% endblock %}

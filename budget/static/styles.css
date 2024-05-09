@@ -167,35 +167,51 @@ table td.current-day:hover {
 }
 
 /* Add income and expense dots for the day or current day */
-.day.income-dot.expense-dot .cell-content::after,
-.day.current-day.income-dot.expense-dot .cell-content::after {
+.day.income-dot.expense-dot .cell-content::after {
     content: "•";  /* Income dot */
     color: green;
     position: relative;
     bottom: -23px; 
-    right: 10px;
     transform: translateX(-50%);
 }
 
-/* Show the income dot for the day or current day */
-.day.income-dot .cell-content::after,
-.day.current-day.income-dot .cell-content::after {
+.day.income-dot .cell-content::after {
     content: "•";  /* Income dot */
     color: green;
     position: relative;
     bottom: -23px; 
-    right: 10px;
     transform: translateX(-50%);
 }
 
-/* Show the expense dot for the day or current day */
-.day.expense-dot .cell-content::before,
-.day.current-day.expense-dot .cell-content::before {
+.day.expense-dot .cell-content::before {
     content: "•";  /* Expense dot */
     color: red;
     position: relative;
     bottom: -23px; 
-    left: 10px; 
+    transform: translateX(-50%);
+}
+
+.current-day.income-dot .cell-content::after {
+    content: "•";  /* Income dot */
+    color: green;
+    position: relative;
+    bottom: -23px; 
+    transform: translateX(-50%);
+}
+
+.current-day.income-dot.expense-dot .cell-content::after {
+    content: "•";  /* Income dot */
+    color: green;
+    position: relative;
+    bottom: -23px; 
+    transform: translateX(-50%);
+}
+
+.current-day.expense-dot .cell-content::before {
+    content: "•";  /* Expense dot */
+    color: red;
+    position: relative;
+    bottom: -23px; 
     transform: translateX(-50%);
 }
 
@@ -315,4 +331,16 @@ table td.current-day:hover {
 /* Style card titles */
 .card-title {
     margin-bottom: 0;
+}
+
+.expenses {
+    color: #ff3333;
+}
+
+.income {
+    color: #33cc33;
+}
+
+.savings {
+    color: #cc9933;
 }
