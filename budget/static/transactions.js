@@ -26,13 +26,12 @@ document.addEventListener('DOMContentLoaded', function() {
         selectField.value = '';
     }
 
-    // Attach the recurring checkbox change event listener
     recurringCheckbox.addEventListener('change', handleRecurringChange);
 
-    // Attach the new category input field input event listener
+
     inputField.addEventListener('input', handleNewCategoryInputChange);
 
-    // Add category button click event listener
+
     document.getElementById('add-category').addEventListener('click', function(event) {
         const newCategoryInput = document.getElementById('new_category');
         const newCategoryName = newCategoryInput.value.trim();
@@ -66,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             console.log('Category created:', data);
             
-            // Update the select dropdown with the newly created category
+
             const selectField = document.getElementById('category');
             const option = document.createElement('option');
             option.text = data.name; 
@@ -74,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
             option.selected = true;  
             selectField.appendChild(option);
         
-            // Clear the input field
+
             newCategoryInput.value = '';  
 
             selectField.disabled = false;

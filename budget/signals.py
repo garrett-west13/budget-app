@@ -132,7 +132,7 @@ def create_or_update_recurring_transactions(recurring_transaction):
     if new_transactions and new_transactions[-1].transaction_date >= end_date:
         last_transaction = new_transactions[-1]
         last_transaction.recurring = False
-        # Use update() to avoid triggering post_save signal
+
         Transaction.objects.filter(pk=last_transaction.pk).update(recurring=False)
 
 

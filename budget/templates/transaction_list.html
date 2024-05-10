@@ -90,17 +90,16 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Retrieve the current year and month from local storage
+
         let currentYear = parseInt(localStorage.getItem('currentYear')) || new Date().getFullYear();
         let currentMonth = parseInt(localStorage.getItem('currentMonth')) || (new Date().getMonth() + 1);
 
-        // Function to update the current year and month in local storage
+
         function updateCurrentDate(year, month) {
             localStorage.setItem('currentYear', year);
             localStorage.setItem('currentMonth', month);
         }
 
-        // Event listener for navigating to the previous month
         document.getElementById('prev-month').addEventListener('click', function() {
             if (currentMonth === 1) {
                 currentMonth = 12;
@@ -112,7 +111,6 @@
             window.location.href = `/transaction_list/${currentYear}/${currentMonth}`;
         });
 
-        // Event listener for navigating to the next month
         document.getElementById('next-month').addEventListener('click', function() {
             if (currentMonth === 12) {
                 currentMonth = 1;
@@ -124,7 +122,6 @@
             window.location.href = `/transaction_list/${currentYear}/${currentMonth}`;
         });
 
-        // Event listener for going back to the current month
         document.getElementById('current-month').addEventListener('click', function() {
             currentYear = new Date().getFullYear();
             currentMonth = new Date().getMonth() + 1;
@@ -132,7 +129,6 @@
             window.location.href = `/transaction_list/${currentYear}/${currentMonth}`;
         });
 
-        // Event listener for date picker change
         document.getElementById('date-picker').addEventListener('change', function() {
             const selectedDate = new Date(this.value);
             const selectedYear = selectedDate.getFullYear();

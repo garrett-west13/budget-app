@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Event listener for date picker change
     document.getElementById('date-picker').addEventListener('change', function() {
-        // Get the selected year and month from the value of the date picker
+        
         const selectedDate = new Date(this.value);
         const selectedYear = selectedDate.getFullYear();
         const selectedMonth = selectedDate.getMonth();
@@ -64,7 +64,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function storeSelectedMonthAndYear(year, month) {
         localStorage.setItem('selectedMonth', month);
         localStorage.setItem('selectedYear', year);
-        // Make an AJAX request to store the selected month and year in Django session
         const csrftoken = getCookie('csrftoken');
         fetch('/store_selected_month_year/', {
             method: 'POST',
@@ -85,7 +84,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .then(data => {
-            // Handle the response data if needed
         })
         .catch(error => {
             console.error(error);
@@ -170,11 +168,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Update total balance and add class based on its value
                 const totalBalanceElement = document.getElementById('total-balance');
-                const totalBalance = parseFloat(data.total_balance); // Parse the total_balance as a float
+                const totalBalance = parseFloat(data.total_balance);
 
                 // Check if totalBalance is a valid number
                 if (!isNaN(totalBalance)) {
-                    // Add plus or minus sign based on balance value
                     const formattedBalance = totalBalance >= 0 ? '+' + totalBalance.toFixed(2) : totalBalance.toFixed(2);
                     totalBalanceElement.textContent = '$' + formattedBalance;
 

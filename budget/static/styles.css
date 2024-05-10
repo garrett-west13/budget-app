@@ -48,7 +48,6 @@
 
 }
 
-/* Define styling for the calendar container */
 .calendar-container {
     max-width: 1000px; 
     margin: 50px auto; 
@@ -62,14 +61,12 @@
     justify-content: center;
 }
 
-/* Define styling for the calendar table */
 table {
     width: 100%;
     border-collapse: collapse;
     border: 2px solid #dddddd; 
 }
 
-/* Define styling for table cells */
 table td {
     padding: 20px 15px; 
     text-align: center;
@@ -77,7 +74,6 @@ table td {
     font-size: 24px; 
 }
 
-/* Define styling for table headers */
 table th {
     background-color: #f2f2f2;
     color: #333333;
@@ -87,14 +83,13 @@ table th {
     font-size: 28px; 
 }
 
-/* Define hover effect on table cells */
 table td.day:hover {
     background-color: #f9f9f9;
     cursor: pointer;
     font-weight: bold;
 }
 
-/* Define styling for the current day */
+
 table td.current-day {
     font-weight: bold;
     background-color: #ffcccc;
@@ -168,7 +163,7 @@ table td.current-day:hover {
 
 /* Add income and expense dots for the day or current day */
 .day.income-dot.expense-dot .cell-content::after {
-    content: "•";  /* Income dot */
+    content: "•"; 
     color: green;
     position: relative;
     bottom: -23px; 
@@ -176,7 +171,7 @@ table td.current-day:hover {
 }
 
 .day.income-dot .cell-content::after {
-    content: "•";  /* Income dot */
+    content: "•"; 
     color: green;
     position: relative;
     bottom: -23px; 
@@ -184,7 +179,7 @@ table td.current-day:hover {
 }
 
 .day.expense-dot .cell-content::before {
-    content: "•";  /* Expense dot */
+    content: "•";  
     color: red;
     position: relative;
     bottom: -23px; 
@@ -192,7 +187,7 @@ table td.current-day:hover {
 }
 
 .current-day.income-dot .cell-content::after {
-    content: "•";  /* Income dot */
+    content: "•"; 
     color: green;
     position: relative;
     bottom: -23px; 
@@ -200,7 +195,7 @@ table td.current-day:hover {
 }
 
 .current-day.income-dot.expense-dot .cell-content::after {
-    content: "•";  /* Income dot */
+    content: "•";  
     color: green;
     position: relative;
     bottom: -23px; 
@@ -208,7 +203,7 @@ table td.current-day:hover {
 }
 
 .current-day.expense-dot .cell-content::before {
-    content: "•";  /* Expense dot */
+    content: "•";  
     color: red;
     position: relative;
     bottom: -23px; 
@@ -312,23 +307,19 @@ table td.current-day:hover {
     font-size: 16px;   
 }
 
-/* Add margin to the top and bottom of the container */
 .container.body {
     margin-top: 50px;
     margin-bottom: 50px;
 }
 
-/* Add padding to the card headers */
 .card-header {
     padding: 10px 15px;
 }
 
-/* Adjust card spacing */
 .card {
     margin-bottom: 20px;
 }
 
-/* Style card titles */
 .card-title {
     margin-bottom: 0;
 }

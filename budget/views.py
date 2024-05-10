@@ -17,17 +17,13 @@ from datetime import timedelta
 @login_required
 def store_selected_month_year(request):
     if request.method == 'POST':
-        # Retrieve the JSON data from the request body
         data = json.loads(request.body)
         selected_month = data.get('selectedMonth')
         selected_year = data.get('selectedYear')
 
-        # Store the selected month and year in the Django session
         request.session['selectedMonth'] = selected_month
         request.session['selectedYear'] = selected_year
 
-
-        # Return a JSON response indicating success
         return JsonResponse({'message': 'Selected month and year stored successfully'})
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=400)
@@ -46,15 +42,13 @@ def register(request):
         if form.is_valid():
             username = form.cleaned_data.get('username')
             if User.objects.filter(username=username).exists():
-                # Username already exists, display error message
+
                 messages.error(request, 'This username is already taken. Please choose a different one.')
             else:
-                # Username is unique, save the form
                 form.save()
                 messages.success(request, f'Account created for {username}. You can now log in.')
                 return redirect('login')
         else:
-            # Form data is invalid, display error message
             messages.error(request, 'Please correct the errors below.')
     else:
         form = RegistrationForm()
@@ -144,26 +138,20 @@ def add_transaction(request, year, month, day):
 def create_category(request):
     if request.method == 'POST':
         try:
-            # Parse JSON data from the request body
             data = json.loads(request.body)
             category_name = data.get('name').capitalize()
 
-            # Validate category_name (e.g., check for empty string)
             if not category_name:
                 raise ValueError('Category name is missing or empty')
 
-            # Create a new category
             category = Category.objects.create(name=category_name, user=request.user)
 
-            # Return a success response with the created category data
             return JsonResponse({'id': category.id, 'name': category.name})
 
         except Exception as e:
-            # Return an error response with an appropriate message
             return JsonResponse({'error': str(e)}, status=400)
 
     else:
-        # Return a method not allowed response if the request method is not POST
         return JsonResponse({'error': 'Method not allowed'}, status=405)  
 
 def calendar(request, year, month):
@@ -187,7 +175,6 @@ def recurring_transaction_detail(request, pk):
 @login_required
 def calculate_totals(request):
 
-    # Retrieve selected month and year from session
     stored_year = request.session.get('selectedYear')
     stored_month = request.session.get('selectedMonth')
 
@@ -195,29 +182,26 @@ def calculate_totals(request):
         current_month = int(stored_month + 1)
         current_year = int(stored_year)
     else:
-        # Set default values for current month and year
+
         current_date = datetime.now()
         current_year = current_date.year
         current_month = current_date.month
 
-    # Calculate total expenses for the month
+
     total_expenses = round(Transaction.objects.filter(
         transaction_date__year=current_year,
         transaction_date__month=current_month,
         is_income=False
     ).aggregate(Sum('amount'))['amount__sum'] or 0.0, 2)
 
-    # Calculate total income for the month
     total_income = round(Transaction.objects.filter(
         transaction_date__year=current_year,
         transaction_date__month=current_month,
         is_income=True
     ).aggregate(Sum('amount'))['amount__sum'] or 0.0, 2)
 
-    # Calculate total balance for the month
     total_balance = round(float(total_income) - float(total_expenses), 2)
 
-    # Calculate total savings for the month (if applicable)
     total_savings = round(Transaction.objects.filter(
         transaction_date__year=current_year,
         transaction_date__month=current_month,
@@ -225,7 +209,6 @@ def calculate_totals(request):
         category__name='Savings'
     ).aggregate(Sum('amount'))['amount__sum'] or 0.0, 2)
 
-    # Return JSON data containing the totals
     data = {
         'total_expenses': total_expenses,
         'total_income': total_income,
@@ -248,7 +231,6 @@ def transaction_list(request, year=None, month=None):
         except ValueError:
             raise Http404("Invalid date")
     else:
-        # Default to current month and year if year and month are not provided
         date = datetime.now()
         year = date.year
         month = date.month
@@ -279,18 +261,15 @@ def update_transaction(request, pk):
     else:
         form = TransactionForm(request.user, instance=transaction)
 
-    # Pass the 'transaction' object to the template context
     return render(request, 'transaction_update.html', {'form': form, 'transaction': transaction})
 
 @login_required
 def delete_transaction(request, pk):
-    # Ensure that the user matches the user who created the transaction
     transaction = get_object_or_404(Transaction, id=pk, user=request.user)
     
     if request.method == 'POST':
         transaction.delete()
         messages.success(request, 'Transaction deleted successfully.')
-        # Redirect to the 'transaction_list' view with appropriate year and month arguments
         return redirect('transaction_list', year=transaction.transaction_date.year, month=transaction.transaction_date.month)
 
     return redirect('transaction_list', year=transaction.transaction_date.year, month=transaction.transaction_date.month)
@@ -326,39 +305,30 @@ def yearly_summary(request, year=None):
     if year is None:
         year = datetime.now().year
 
-    # Retrieve the total income, total expenses, and balance for the selected year
     transactions = Transaction.objects.filter(
         user=request.user,
         transaction_date__year=year
     )
 
-    # Calculate total income and expenses
     total_income = round(transactions.filter(is_income=True).aggregate(total=Sum('amount'))['total'] or 0, 2)
     total_expenses = round(transactions.filter(is_income=False).aggregate(total=Sum('amount'))['total'] or 0, 2)
 
-    # Calculate balance
     balance = round(total_income - total_expenses, 2)
 
-    # Calculate total savings
     total_savings = round(transactions.filter(category__name='Savings', is_income=False).aggregate(total=Sum('amount'))['total'] or 0, 2)
 
-    # Calculate monthly summaries
     monthly_summaries = {}
     for month in range(1, 13):
         month_name = datetime.strptime(str(month), "%m").strftime("%B")
         month_transactions = transactions.filter(transaction_date__month=month)
 
-        # Calculate total income and expenses for the month
         month_total_income = round(month_transactions.filter(is_income=True).aggregate(total=Sum('amount'))['total'] or 0, 2)
         month_total_expenses = round(month_transactions.filter(is_income=False).aggregate(total=Sum('amount'))['total'] or 0, 2)
 
-        # Calculate balance for the month
         month_balance = round(month_total_income - month_total_expenses, 2)
 
-        # Calculate monthly savings
         month_savings = round(month_transactions.filter(category__name='Savings', is_income=False).aggregate(total=Sum('amount'))['total'] or 0, 2)
 
-        # Store monthly summary in dictionary
         monthly_summaries[month_name] = {
             'total_income': month_total_income,
             'total_expenses': month_total_expenses,

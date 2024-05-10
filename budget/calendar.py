@@ -22,43 +22,39 @@ class Calendar(HTMLCalendar):
         if not isinstance(year, int) or not isinstance(month, int):
             raise ValueError("Year and month must be integers")
 
-        # Convert month to an integer
         month_int = int(month)
 
-        # Generate the HTML code for the calendar
         html_code = "<table>\n"
         html_code += f"  <tr><th colspan='7'>{year} {self.month_name[month_int]}</th></tr>\n"
         html_code += "  <tr><th class='mon'>Mon</th><th class='tue'>Tue</th><th class='wed'>Wed</th><th class='thu'>Thu</th><th class='fri'>Fri</th><th class='sat'>Sat</th><th class='sun'>Sun</th></tr>\n"
 
-        # Get the first day of the month
+    
         first_day = datetime(year, month_int, 1)
 
-        # Get the weekday (0-6) of the first day of the month
+
         first_weekday = first_day.weekday()
 
-        # Get the number of days in the month
+
         days_in_month = self.monthrange(year, month_int)[1]
 
-        # Get the current date
         current_date = datetime.now().date()
 
         transactions = Transaction.objects.filter(transaction_date__year=year, transaction_date__month=month_int)
 
-        # Create a dictionary to store the days with transactions
+
         days_with_transactions = {day: False for day in range(1, days_in_month + 1)}
 
-        # Update the dictionary with the days that have transactions
+
         for transaction in transactions:
             transaction_day = transaction.transaction_date.day
             days_with_transactions[transaction_day] = True
 
 
-        # Calculate the number of weeks in the month
         num_weeks = (days_in_month + first_weekday) // 7
         if (days_in_month + first_weekday) % 7 > 0:
             num_weeks += 1
 
-        # Generate the rows and cells for the calendar
+
         for week in range(num_weeks):
             html_code += "  <tr>\n"
             for day in range(7):
@@ -75,7 +71,6 @@ class Calendar(HTMLCalendar):
                     
                     dots = ''
                     if days_with_transactions[current_day]:
-                        # If there are transactions for the current day
                         income_transactions = [transaction for transaction in transactions if transaction.transaction_date.day == current_day and transaction.is_income]
                         expense_transactions = [transaction for transaction in transactions if transaction.transaction_date.day == current_day and not transaction.is_income]
                         
