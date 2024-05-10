@@ -50,7 +50,7 @@ To run the application locally, follow these steps:
 
 ## Conclusion
 
-In conclusion, my project offers a unique and complex web application built with Django and JavaScript, fulfilling the requirements for distinctiveness and complexity. By incorporating advanced backend logic, interactive frontend components, and responsive design principles, we deliver a robust and user-friendly solution tailored to the needs of my target audience. My comprehensive documentation ensures seamless setup and understanding for both users and developers, further enhancing the project's value and usability.
+In conclusion, my project offers a unique and complex web application built with Django and JavaScript, fulfilling the requirements for distinctiveness and complexity. By incorporating advanced backend logic, interactive frontend components, and responsive design principles, I deliver a robust and user-friendly solution tailored to the needs of my target audience. My comprehensive documentation ensures seamless setup and understanding for both users and developers, further enhancing the project's value and usability.
 
 ## License
 
