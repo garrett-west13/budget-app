@@ -8,24 +8,28 @@
     <div class="card mb-4">
         <div class="card-body">
             <h5 class="card-title">Original Transaction:</h5>
+            <p class="card-text"><strong>Category:</strong> {{ original_transaction.category.name }}</p>
             <p class="card-text"><strong>Description:</strong> {{ original_transaction.description }}</p>
             <p class="card-text"><strong>Amount:</strong> {{ original_transaction.amount }}</p>
-            <p class="card-text"><strong>Category:</strong> {{ original_transaction.category.name }}</p>
             <p class="card-text"><strong>Start Date:</strong> {{ original_transaction.start_date }}</p>
             <p class="card-text"><strong>End Date:</strong> {{ original_transaction.end_date }}</p>
             <p class="card-text"><strong>Frequency:</strong> {{ original_transaction.frequency }}</p>
         </div>
     </div>
 
-    {% for transaction in transactions %}
-    <div class="card mb-4">
-        <div class="card-body">
-            <h5 class="card-title">Transaction Details</h5>
-            <p class="card-text"><strong>Amount:</strong> {{ transaction.amount }}</p>
-            <p class="card-text"><strong>Transaction Date:</strong> {{ transaction.transaction_date }}</p>
-            <p class="card-text"><strong>Original Transaction:</strong> {{ transaction.original_transaction }}</p>
+    <div class="row">
+        {% for transaction in transactions %}
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Transaction Details</h5>
+                    <p class="card-text"><strong>Description:</strong> {{ transaction.description }}</p>
+                    <p class="card-text"><strong>Amount:</strong> {{ transaction.amount }}</p>
+                    <p class="card-text"><strong>Transaction Date:</strong> {{ transaction.transaction_date }}</p>
+                </div>
+            </div>
         </div>
+        {% endfor %}
     </div>
-    {% endfor %}
 </div>
 {% endblock %}

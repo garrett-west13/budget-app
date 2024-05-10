@@ -22,8 +22,8 @@
                 <ul class="list-group">
                     <li class="list-group-item">Total Income: <span class="income">${{ yearly_summary.total_income }}</span></li>
                     <li class="list-group-item">Total Expenses: <span class="expenses">${{ yearly_summary.total_expenses }}</span></li>
-                    <li class="list-group-item">Balance: <span class="{% if yearly_summary.balance < 0 %}text-danger{% elif yearly_summary.balance > 0 %}text-success{% endif %}">${{ yearly_summary.balance }}</span></li>
                     <li class="list-group-item">Total Savings: <span class="savings">${{ yearly_summary.total_savings }}</span></li>
+                    <li class="list-group-item">Balance: <span class="{% if yearly_summary.balance < 0 %}text-danger{% elif yearly_summary.balance > 0 %}text-success{% endif %}">${{ yearly_summary.balance }}</span></li>
                 </ul>
             </div>
         </div>
@@ -39,8 +39,8 @@
                                     <h5 class="card-title">{{ month }}</h5>
                                     <p class="card-text">Total Income: <span class="income">${{ summary.total_income }}</span></p>
                                     <p class="card-text">Total Expenses: <span class="expenses">${{ summary.total_expenses }}</span></p>
-                                    <p class="card-text">Balance: <span class="{% if summary.balance < 0 %}text-danger{% elif summary.balance > 0 %}text-success{% endif %}">${{ summary.balance }}</span></p>
                                     <p class="card-text">Total Savings: <span class="savings">${{ summary.total_savings }}</span></p>
+                                    <p class="card-text">Balance: <span class="{% if summary.balance < 0 %}text-danger{% elif summary.balance > 0 %}text-success{% endif %}">${{ summary.balance }}</span></p>
                                 </div>
                             </div>
                         </div>

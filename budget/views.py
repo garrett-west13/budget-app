@@ -253,9 +253,9 @@ def transaction_list(request, year=None, month=None):
         year = date.year
         month = date.month
 
-    transactions = Transaction.objects.filter(user=request.user, recurring=False, original_transaction__isnull=True, transaction_date__year=year, transaction_date__month=month).order_by('-transaction_date')
+    transactions = Transaction.objects.filter(user=request.user, recurring=False, original_transaction__isnull=True, transaction_date__year=year, transaction_date__month=month)
 
-    recurring_transactions = Transaction.objects.filter(user=request.user, recurring=True, transaction_date__year=year, transaction_date__month=month).order_by('-transaction_date')
+    recurring_transactions = Transaction.objects.filter(user=request.user, recurring=True, transaction_date__year=year, transaction_date__month=month)
 
     context = {
         'transactions': transactions,

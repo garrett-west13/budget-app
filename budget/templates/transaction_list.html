@@ -65,13 +65,14 @@
                     {% for recurring_transaction in recurring_transactions %}
                         <div class="card mb-3">
                             <div class="card-body">
-                                <h5 class="card-title">{{ recurring_transaction.description }}</h5>
+                                <h5 class="card-text">Category: {{ recurring_transaction.category.name }}</h5>
+                                <p class="card-title">Description: {{ recurring_transaction.description }}</p>
                                 <p class="card-text">Amount: ${{ recurring_transaction.amount }}</p>
                                 <p class="card-text">Frequency: {{ recurring_transaction.frequency }}</p>
                                 <p class="card-text">Transaction Date: {{ recurring_transaction.transaction_date }}</p>
                                 <p class="card-text">End Date: {{ recurring_transaction.end_date }}</p>
                                 <div class="btn-group">
-                                    <a href="{% url 'recurring_transaction_detail' recurring_transaction.id %}" class="btn btn-primary btn-sm mr-2">View Details</a>
+                                    <a href="{% if recurring_transaction.original_transaction %}{% url 'recurring_transaction_detail' recurring_transaction.original_transaction.id %}{% else %}{% url 'recurring_transaction_detail' recurring_transaction.id %}{% endif %}" class="btn btn-primary btn-sm mr-2">View Details</a>
                                     <a href="{% url 'update_transaction' recurring_transaction.id %}" class="btn btn-primary btn-sm mr-2">Update</a>
                                     <form action="{% url 'delete_transaction' recurring_transaction.id %}" method="post">
                                         {% csrf_token %}
