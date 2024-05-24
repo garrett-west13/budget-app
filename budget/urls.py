@@ -19,4 +19,6 @@ urlpatterns = [
     path('category_detail/<int:pk>/', views.category_detail, name='category_detail'),
     path('delete_category/<int:pk>/', views.delete_category, name='delete_category'),
     path('yearly_summary/<int:year>/', views.yearly_summary, name='yearly_summary'),
+    path('update_all_transactions/<int:pk>/', views.update_all_transactions, name='update_all_transactions'),
+    path('delete_all_transactions/<int:pk>/', views.delete_all_transactions, name='delete_all_transactions'),
 ]

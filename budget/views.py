@@ -10,7 +10,7 @@ from .calendar import Calendar
 from datetime import datetime
 from .models import Transaction, Category
 from django.http import JsonResponse, Http404, HttpResponse
-from django.db.models import Sum, Count, Q 
+from django.db.models import Sum, Count, Q
 from datetime import timedelta
 
 
@@ -161,16 +161,34 @@ def calendar(request, year, month):
 
 @login_required
 def recurring_transaction_detail(request, pk):
-    transactions = Transaction.objects.filter(user=request.user, original_transaction_id=pk)
-    original_transaction = Transaction.objects.get(id=pk)
+    try:
+        # Attempt to retrieve the original transaction
+        original_transaction = Transaction.objects.get(id=pk, user=request.user)
 
-    context = {
-        'transactions': transactions,
-        'original_transaction': original_transaction
+        # Check if the provided pk corresponds to the original transaction
+        if original_transaction.original_transaction is not None:
+            # If the pk is not the original transaction, raise a 404 error
+            raise Http404("This transaction is not the original one.")
 
-    }
+        # Retrieve all related transactions based on the original transaction
+        transactions = Transaction.objects.filter(user=request.user, related_transaction=original_transaction)
 
-    return render(request, 'recurring_transaction_detail.html', context)
+        # If no related transactions are found, inform the user
+        if not transactions.exists():
+            messages.info(request, 'No related recurring transactions found.')
+
+        context = {
+            'transactions': transactions,
+            'original_transaction': original_transaction
+        }
+
+        return render(request, 'recurring_transaction_detail.html', context)
+
+    except Transaction.DoesNotExist:
+        raise Http404("Transaction not found.")
+
+
+
 
 @login_required
 def calculate_totals(request):
@@ -346,4 +364,74 @@ def yearly_summary(request, year=None):
     }
 
     return render(request, 'yearly_summary.html', {'yearly_summary': yearly_summary_data})
+
+@login_required
+def update_all_transactions(request, pk):
+    try:
+        # Retrieve the transaction
+        original_transaction = get_object_or_404(Transaction, id=pk, user=request.user)
+
+        if request.method == 'POST':
+            # Get the form data for the original transaction
+            form = TransactionForm(request.user, request.POST, instance=original_transaction)
+            if form.is_valid():
+                # Save the original transaction
+                form.save()
+
+                # Retrieve all subsequent recurring transactions
+                transactions = Transaction.objects.filter(
+                    user=request.user, 
+                    original_transaction=original_transaction
+                )
+
+                # Update fields
+                for t in transactions:
+                    t.amount = original_transaction.amount
+                    t.description = original_transaction.description
+                    t.category = original_transaction.category
+                    t.is_income = original_transaction.is_income
+                    t.end_date = original_transaction.end_date
+                    t.start_date = original_transaction.start_date
+                    t.frequency = original_transaction.frequency
+                    t.recurring = original_transaction.recurring
+
+                # Bulk update transactions
+                Transaction.objects.bulk_update(transactions, [
+                    'amount', 'description', 'category', 'is_income', 'end_date', 
+                    'start_date', 'frequency', 'recurring'
+                ])
+
+                messages.success(request, 'All transactions updated successfully.')
+                return redirect('recurring_transaction_detail', pk=original_transaction.id)
+        else:
+            form = TransactionForm(request.user, instance=original_transaction)
+
+        return render(request, 'update_all_transactions.html', {'form': form, 'transaction': original_transaction})
+
+    except Transaction.DoesNotExist:
+        raise Http404("Transaction not found.")
+
+
+@login_required
+def delete_all_transactions(request, pk):
+    if request.method == 'POST':
+        try:
+            # Retrieve the transaction
+            original_transaction = Transaction.objects.get(user=request.user, id=pk)
+
+            transactions = Transaction.objects.filter(
+                user=request.user,
+                original_transaction=original_transaction
+            )
+
+            # Delete all related recurring transactions
+            transactions.delete()
+            original_transaction.delete()
+
+            messages.success(request, 'All transactions deleted successfully.')
+            return redirect('transaction_list', year=original_transaction.transaction_date.year, month=original_transaction.transaction_date.month)
+        
+        except Transaction.DoesNotExist:
+            messages.error(request, 'Transaction not found.')
+            return redirect('transaction_list', year=original_transaction.transaction_date.year, month=original_transaction.transaction_date.month)
 
