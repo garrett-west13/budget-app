@@ -18,3 +18,8 @@ dist/
 # Ignore development dependencies
 requirements-dev.txt
 requirements-dev.lock
+
+# Ignore production dependencies
+requirements.txt
+requirements.lock
+settings.py

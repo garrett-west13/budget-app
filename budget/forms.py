@@ -2,7 +2,6 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from .models import Transaction , Category
-from datetime import datetime, timedelta
 
 class RegistrationForm(UserCreationForm):
     email = forms.EmailField(required=True)

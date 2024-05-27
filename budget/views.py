@@ -10,7 +10,7 @@ from .calendar import Calendar
 from datetime import datetime
 from .models import Transaction, Category
 from django.http import JsonResponse, Http404, HttpResponse
-from django.db.models import Sum, Count, Q
+from django.db.models import Sum, Count
 from datetime import timedelta
 
 
