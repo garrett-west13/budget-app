@@ -5,6 +5,7 @@ __pycache__/
 # Ignore virtual environment
 venv/
 myenv/
+.venv/
 
 # Ignore IDE-specific files
 .idea/
@@ -23,3 +24,6 @@ requirements-dev.lock
 requirements.txt
 requirements.lock
 settings.py
+
+# Ignore environment files
+.env

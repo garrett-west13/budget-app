@@ -34,6 +34,10 @@ To run the application locally:
 6. Start the Django development server with `python manage.py runserver`.
 7. Access the application at `http://localhost:8000`.
 
+## Deployment to Heroku
+
+The Budget Project is deployed to Heroku for seamless hosting and scalability. The application leverages Heroku's managed PostgreSQL service and integrates with AWS S3 for static file storage. The deployment process ensures reliability and performance for users accessing the application from various locations.
+
 ## Additional Information
 
 - **Database**: The application uses SQLite as the default backend but can be configured for other databases supported by Django.
