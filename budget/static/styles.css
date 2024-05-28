@@ -335,3 +335,86 @@ table td.current-day:hover {
 .savings {
     color: #cc9933;
 }
+
+/* Responsive styles for calendar */
+@media screen and (max-width: 768px) {
+    .calendar-container {
+        padding: 10px;
+    }
+
+    table {
+        font-size: 16px;
+    }
+
+    table th,
+    table td {
+        padding: 15px;
+        font-size: 18px;
+    }
+}
+
+@media screen and (max-width: 576px) {
+    .calendar-container {
+        padding: 5px;
+    }
+
+    table {
+        font-size: 14px;
+    }
+
+    table th,
+    table td {
+        padding: 10px;
+        font-size: 16px;
+    }
+}
+
+#calendar-container {
+    text-align: center;
+}
+
+#calendar {
+    display: inline-block;
+    overflow-x: auto;
+}
+
+.btn {
+    padding: 10px 20px;
+    font-size: 16px;
+}
+
+/* Adjust button size for smaller screens */
+@media screen and (max-width: 768px) {
+    .btn {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+}
+
+/* Adjust text alignment for smaller screens */
+@media screen and (max-width: 576px) {
+    #calendar-container,
+    p.text-muted {
+        text-align: left;
+    }
+}
+
+.calendar {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.calendar th,
+.calendar td {
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #ccc;
+}
+
+/* Adjust font size for smaller screens */
+@media screen and (max-width: 768px) {
+    .calendar th,
+    .calendar td {
+        font-size: 14px;
+    }
+}

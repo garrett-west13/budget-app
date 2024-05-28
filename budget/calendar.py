@@ -24,7 +24,7 @@ class Calendar(HTMLCalendar):
 
         month_int = int(month)
 
-        html_code = "<table>\n"
+        html_code = "<table class='calendar'>\n"
         html_code += f"  <tr><th colspan='7'>{year} {self.month_name[month_int]}</th></tr>\n"
         html_code += "  <tr><th class='mon'>Mon</th><th class='tue'>Tue</th><th class='wed'>Wed</th><th class='thu'>Thu</th><th class='fri'>Fri</th><th class='sat'>Sat</th><th class='sun'>Sun</th></tr>\n"
 
