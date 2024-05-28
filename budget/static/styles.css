@@ -385,3 +385,15 @@ table td.current-day:hover {
         text-align: left;
     }
 }
+
+/* Adjust dot position for smaller screens */
+@media screen and (max-width: 576px) {
+    .day.income-dot.expense-dot .cell-content::after,
+    .day.income-dot .cell-content::after,
+    .day.expense-dot .cell-content::before,
+    .current-day.income-dot .cell-content::after,
+    .current-day.income-dot.expense-dot .cell-content::after,
+    .current-day.expense-dot .cell-content::before {
+        bottom: -15px; /* Adjust the bottom position */
+    }
+}
