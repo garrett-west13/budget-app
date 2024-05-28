@@ -99,7 +99,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Set STATIC_ROOT to an empty string for Heroku deployment
+STATIC_ROOT = ''
 
 # AWS S3 settings
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
@@ -111,6 +113,10 @@ AWS_S3_SIGNATURE_VERSION = 's3v4'
 AWS_S3_FILE_OVERWRITE = False
 AWS_DEFAULT_ACL = None
 
+# Static files storage configuration
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+# STORAGES settings for Django Storages
 STORAGES = {
     'staticfiles': {
         'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage',
