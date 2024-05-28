@@ -369,20 +369,6 @@ table td.current-day:hover {
     }
 }
 
-#calendar-container {
-    text-align: center;
-}
-
-#calendar {
-    display: inline-block;
-    overflow-x: auto;
-}
-
-.btn {
-    padding: 10px 20px;
-    font-size: 16px;
-}
-
 /* Adjust button size for smaller screens */
 @media screen and (max-width: 768px) {
     .btn {
