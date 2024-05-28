@@ -113,12 +113,15 @@ AWS_S3_SIGNATURE_VERSION = 's3v4'
 AWS_S3_FILE_OVERWRITE = False
 AWS_DEFAULT_ACL = None
 
-# STORAGES settings for Django Storages
-STORAGES = {
-    'staticfiles': {
-        'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage',
-    }
-}
+# Remove the STORAGES dictionary
+# STORAGES = {
+#     'staticfiles': {
+#         'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage',
+#     }
+# }
+
+# Set STATICFILES_STORAGE directly
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 # Activate Django-Heroku.
 django_heroku.settings(locals())
