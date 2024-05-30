@@ -22,17 +22,6 @@ The project achieves complexity through advanced backend logic, interactive fron
   - **/budget**: Django app directory containing models, views, forms, templates, and static files.
   - **manage.py**: Django management script.
 
-## How to Run
-
-To run the application locally:
-
-1. Clone the project repository.
-2. Navigate to the project directory.
-3. Install dependencies with `pip install -r requirements.txt`.
-4. Configure database settings in `budget_app/settings.py`.
-5. Run Django migrations with `python manage.py migrate`.
-6. Start the Django development server with `python manage.py runserver`.
-7. Access the application at `http://localhost:8000`.
 
 ## Deployment to Heroku
 
@@ -40,7 +29,6 @@ The Budget Project is deployed to Heroku for seamless hosting and scalability. T
 
 ## Additional Information
 
-- **Database**: The application uses SQLite as the default backend but can be configured for other databases supported by Django.
 - **Dependencies**: Additional Python packages required are listed in `requirements.txt`.
 
 ## Conclusion
