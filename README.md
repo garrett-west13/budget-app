@@ -12,9 +12,8 @@ The project achieves complexity through advanced backend logic, interactive fron
 
 1. **Robust Backend Architecture**: Utilizing Django, the backend efficiently handles server-side operations, ensuring seamless data management.
 2. **Interactive Frontend Elements**: Incorporating JavaScript, HTML, and CSS, the application delivers dynamic and interactive user interfaces.
-3. **Responsive Design Principles**: Following a mobile-first approach, the application ensures responsiveness across various devices.
-4. **Advanced User Authentication and Authorization**: Robust mechanisms secure sensitive financial data, including password hashing and role-based access control.
-5. **Comprehensive Testing and Documentation**: Extensive documentation provides clear instructions on setup, configuration, and usage.
+3. **Advanced User Authentication and Authorization**: Robust mechanisms secure sensitive financial data, including password hashing and role-based access control.
+4. **Comprehensive Testing and Documentation**: Extensive documentation provides clear instructions on setup, configuration, and usage.
 
 ## File Structure
 
